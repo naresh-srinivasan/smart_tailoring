@@ -1,0 +1,70 @@
+{
+  "Men": {
+    "Shirt": {
+      "baseCost": 50,
+      "materials": ["Cotton", "Linen", "Silk", "Polyester"],
+      "colors": ["White", "Black", "Blue", "Red", "Green","Yellow"],
+      "measurements": [
+        {"name": "Neck", "placeholder": "Enter neck size in inches", "instruction": "Measure around the base of the neck comfortably."},
+        {"name": "Shoulder", "placeholder": "Enter shoulder width in inches", "instruction": "Measure from one shoulder edge to the other across the back."},
+        {"name": "Chest", "placeholder": "Enter chest size in inches", "instruction": "Measure around the fullest part of the chest."},
+        {"name": "Waist", "placeholder": "Enter waist size in inches", "instruction": "Measure around the natural waistline."},
+        {"name": "Sleeve Length", "placeholder": "Enter sleeve length in inches", "instruction": "Measure from shoulder seam to wrist."},
+        {"name": "Shirt Length", "placeholder": "Enter shirt length in inches", "instruction": "Measure from shoulder seam to desired shirt bottom."}
+      ],
+      "extras": [
+        {"name": "Extra Buttons", "cost": 5},
+        {"name": "Embroidery", "cost": 15},
+        {"name": "Pocket Design", "cost": 10}
+      ]
+    },
+    "Pant": {
+      "baseCost": 40,
+      "materials": ["Cotton", "Denim", "Linen"],
+      "colors": ["Black", "Blue", "Gray", "Brown"],
+      "measurements": [
+        {"name": "Waist", "placeholder": "Enter waist size in inches", "instruction": "Measure around the natural waistline."},
+        {"name": "Hip", "placeholder": "Enter hip size in inches", "instruction": "Measure around the fullest part of the hips."},
+        {"name": "Inseam", "placeholder": "Enter inseam length in inches", "instruction": "Measure from crotch to bottom of ankle."},
+        {"name": "Outseam", "placeholder": "Enter outseam length in inches", "instruction": "Measure from waistband to bottom of pant."}
+      ],
+      "extras": [
+        {"name": "Cuff Design", "cost": 8},
+        {"name": "Belt Loops", "cost": 5}
+      ]
+    }
+  },
+  "Women": {
+    "Kurta": {
+      "baseCost": 60,
+      "materials": ["Cotton", "Silk", "Linen", "Chiffon"],
+      "colors": ["Red", "Blue", "Green", "Yellow", "White", "Pink"],
+      "measurements": [
+        {"name": "Shoulder", "placeholder": "Enter shoulder width in inches", "instruction": "Measure from one shoulder edge to the other."},
+        {"name": "Bust", "placeholder": "Enter bust size in inches", "instruction": "Measure around the fullest part of the bust."},
+        {"name": "Waist", "placeholder": "Enter waist size in inches", "instruction": "Measure around natural waistline."},
+        {"name": "Hip", "placeholder": "Enter hip size in inches", "instruction": "Measure around the fullest part of the hips."},
+        {"name": "Kurta Length", "placeholder": "Enter desired kurta length", "instruction": "Measure from shoulder seam to desired kurta bottom."},
+        {"name": "Sleeve Length", "placeholder": "Enter sleeve length in inches", "instruction": "Measure from shoulder seam to wrist."}
+      ],
+      "extras": [
+        {"name": "Embroidery", "cost": 20},
+        {"name": "Side Slits", "cost": 10}  
+      ]
+    },
+    "Lehenga": {
+      "baseCost": 120,
+      "materials": ["Silk", "Cotton", "Chiffon", "Velvet"],
+      "colors": ["Red", "Blue", "Green", "Pink", "Purple", "Gold"],
+      "measurements": [
+        {"name": "Waist", "placeholder": "Enter waist size in inches", "instruction": "Measure around the natural waistline."},
+        {"name": "Hip", "placeholder": "Enter hip size in inches", "instruction": "Measure around the fullest part of the hips."},
+        {"name": "Lehenga Length", "placeholder": "Enter lehenga length", "instruction": "Measure from waist to desired hemline."}
+      ],
+      "extras": [
+        {"name": "Dupatta Embroidery", "cost": 30},
+        {"name": "Border Design", "cost": 25}
+      ]
+    }
+  }
+}
