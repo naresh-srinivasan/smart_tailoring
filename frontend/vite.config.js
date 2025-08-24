@@ -10,7 +10,7 @@ export default defineConfig({
     open: true,        // Automatically open browser
   },
   build: {
-    outDir: 'dist',    // Output folder for production build
+    outDir: 'build',    // Output folder for production build
   },
   resolve: {
     alias: {
