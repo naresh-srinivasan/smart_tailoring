@@ -6,6 +6,8 @@ export default function MeasurementsForm({
   measurementsData,
   measurementUnit,
   setMeasurementUnit,
+  currency,
+  setCurrency,
   formData,
   setFormData,
   showInstructions,
@@ -15,19 +17,27 @@ export default function MeasurementsForm({
   materialCosts,
   material,
   totalCost,
+  conversionRate,
   DELIVERY_CHARGE,
   LABOUR_CHARGE,
   onBack,
   onSubmit,
 }) {
   const fields = measurementsData[gender]?.[dressType]?.measurements || [];
-
   const onInputChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // Helper to format currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency,
+    }).format(value * conversionRate);
+  };
+
   return (
     <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Unit */}
+      {/* Measurement Unit */}
       <div className="md:col-span-2 flex flex-col gap-2">
         <label className="text-gray-700 font-medium">Measurement Unit</label>
         <select
@@ -37,6 +47,20 @@ export default function MeasurementsForm({
         >
           <option value="cm">Centimeters (cm)</option>
           <option value="inches">Inches (in)</option>
+        </select>
+      </div>
+
+      {/* Currency */}
+      <div className="md:col-span-2 flex flex-col gap-2">
+        <label className="text-gray-700 font-medium">Currency</label>
+        <select
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        >
+          <option value="INR">₹ - Indian Rupee</option>
+          <option value="USD">$ - US Dollar</option>
+          <option value="EUR">€ - Euro</option>
         </select>
       </div>
 
@@ -95,7 +119,7 @@ export default function MeasurementsForm({
                   className="w-4 h-4"
                 />
                 <span>
-                  {ex.name} (+₹{ex.cost})
+                  {ex.name} (+{formatCurrency(ex.cost)})
                 </span>
               </label>
             ))}
@@ -109,37 +133,38 @@ export default function MeasurementsForm({
         <div className="space-y-1 text-gray-700">
           <div className="flex justify-between">
             <span>Base Cost:</span>
-            <span>₹{measurementsData[gender]?.[dressType]?.baseCost || 0}</span>
+            <span>{formatCurrency(measurementsData[gender]?.[dressType]?.baseCost || 0)}</span>
           </div>
           <div className="flex justify-between">
             <span>Material Cost:</span>
             <span>
-              ₹
-              {material && materialCosts[material]
-                ? (materialCosts[material] * (materialNeeded || 0)).toFixed(2)
-                : 0}
+              {formatCurrency(
+                material && materialCosts[material]
+                  ? materialCosts[material] * (materialNeeded || 0)
+                  : 0
+              )}
             </span>
           </div>
           <div className="flex justify-between">
             <span>Labour Charge:</span>
-            <span>₹{LABOUR_CHARGE}</span>
+            <span>{formatCurrency(LABOUR_CHARGE)}</span>
           </div>
           <div className="flex justify-between">
             <span>Delivery Charge:</span>
-            <span>₹{DELIVERY_CHARGE}</span>
+            <span>{formatCurrency(DELIVERY_CHARGE)}</span>
           </div>
           {measurementsData[gender]?.[dressType]?.extras
             ?.filter((ex) => ex.selected)
             .map((ex) => (
               <div key={ex.name} className="flex justify-between text-sm">
                 <span>{ex.name}:</span>
-                <span>₹{ex.cost}</span>
+                <span>{formatCurrency(ex.cost)}</span>
               </div>
             ))}
           <hr className="my-2" />
           <div className="flex justify-between font-bold text-lg text-blue-600">
             <span>Total:</span>
-            <span>₹{totalCost}</span>
+            <span>{formatCurrency(totalCost)}</span>
           </div>
         </div>
       </div>

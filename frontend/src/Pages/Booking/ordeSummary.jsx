@@ -1,5 +1,4 @@
-import React from "react";
-
+// Add currency & conversionRate props
 export default function OrderSummary({
   gender,
   dressType,
@@ -27,6 +26,8 @@ export default function OrderSummary({
   setDeliveryAddress,
   expectedDate,
   setExpectedDate,
+  currency,
+  conversionRate,
   isSubmitting,
   onBack,
   onSubmit,
@@ -34,11 +35,17 @@ export default function OrderSummary({
   const extras = measurementsData[gender]?.[dressType]?.extras || [];
   const selectedExtras = extras.filter((ex) => ex.selected);
 
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency }).format(
+      value * conversionRate
+    );
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Summary */}
+      {/* Order Summary */}
       <div className="md:col-span-2 p-4 border rounded-lg bg-gray-50">
         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p><strong>Gender:</strong> {gender}</p>
@@ -59,19 +66,19 @@ export default function OrderSummary({
                 {[buttonType, buttonColor].filter(Boolean).join(" / ")}
               </p>
             )}
+            <p><strong>Currency:</strong> {currency}</p>
           </div>
 
           <div>
             <h3 className="font-semibold mb-2">Measurements:</h3>
             <div className="text-sm space-y-1">
-              {Object.entries(formData).map(([key, value]) => (
+              {Object.entries(formData).map(([key, value]) =>
                 value !== undefined && value !== null && key !== "buttons" ? (
                   <p key={key}>
-                    {key}: {value}
-                    {typeof value === "number" || Number.isFinite(Number(value)) ? measurementUnit : ""}
+                    {key}: {value} {typeof value === "number" ? measurementUnit : ""}
                   </p>
                 ) : null
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -82,14 +89,14 @@ export default function OrderSummary({
             <ul className="list-disc list-inside text-sm">
               {selectedExtras.map((ex) => (
                 <li key={ex.name}>
-                  {ex.name} (+₹{ex.cost})
+                  {ex.name} (+{formatCurrency(ex.cost)})
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Promo */}
+        {/* Promo & Total */}
         <div className="md:col-span-2 mt-4 p-4 border rounded-lg bg-gray-50">
           <h2 className="text-xl font-semibold mb-2">Apply Promo Code</h2>
           <div className="flex gap-2 items-center">
@@ -119,15 +126,14 @@ export default function OrderSummary({
               Promo applied! You got {discount}% off
             </p>
           )}
-        </div>
 
-        {/* Total */}
-        <div className="mt-4 pt-4 border-t">
-          <p className="text-lg font-bold text-blue-600">Total Amount: ₹{totalCost}</p>
+          <div className="mt-4 pt-4 border-t text-lg font-bold text-blue-600">
+            Total Amount: {formatCurrency(totalCost)}
+          </div>
         </div>
       </div>
 
-      {/* Delivery */}
+      {/* Delivery Details */}
       <div className="md:col-span-2 p-4 border rounded-lg bg-gray-50">
         <h2 className="text-xl font-semibold mb-4">Delivery Details</h2>
         <div className="space-y-4">
@@ -137,11 +143,7 @@ export default function OrderSummary({
               checked={useProfileAddress}
               onChange={(e) => {
                 setUseProfileAddress(e.target.checked);
-                if (e.target.checked) {
-                  setDeliveryAddress(userProfile.address || "");
-                } else {
-                  setDeliveryAddress("");
-                }
+                setDeliveryAddress(e.target.checked ? userProfile.address || "" : "");
               }}
             />
             <span>Use address from profile</span>
@@ -175,9 +177,7 @@ export default function OrderSummary({
               value={expectedDate}
               onChange={(e) => setExpectedDate(e.target.value)}
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              min={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                .toISOString()
-                .split("T")[0]}
+              min={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
               required
             />
             <p className="text-sm text-gray-600">
