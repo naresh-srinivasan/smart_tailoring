@@ -16,15 +16,6 @@ router.post("/", authenticate, async (req, res) => {
   const userId = req.userId;
 
   try {
-    // Save measurements
-    const measurement = await Measurement.create({
-      user_id: userId,
-      gender,
-      dress_type,
-      data: measurements,
-      schema: "smart_schema",
-    });
-
     // Create order
     const order = await Order.create({
       userId,
@@ -36,7 +27,7 @@ router.post("/", authenticate, async (req, res) => {
       schema: "smart_schema",
     });
 
-    res.status(201).json({ message: "Measurements and order saved successfully", measurement, order });
+    res.status(201).json({ message: "Measurements and order saved successfully", order });
   } catch (err) {
     console.error("Sequelize error:", err);
     res.status(500).json({ message: "Server error", error: err.message });

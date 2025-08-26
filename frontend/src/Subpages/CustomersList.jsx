@@ -1,5 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  FaSearch,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSortUp,
+  FaSortDown,
+  FaSort,
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaSpinner,
+  FaUsers,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
 
 export default function CustomersList() {
   const [customers, setCustomers] = useState([]);
@@ -145,161 +161,370 @@ export default function CustomersList() {
     currentPage * perPage
   );
 
-  return (
-    <div className="bg-white shadow-lg rounded-2xl p-6 relative">
-      <h3 className="text-2xl font-bold mb-4 text-blue-600">Customers List</h3>
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <FaSort className="w-3 h-3 opacity-50" />;
+    return sortOrder === "asc" ? 
+      <FaSortUp className="w-3 h-3 text-blue-600" /> : 
+      <FaSortDown className="w-3 h-3 text-blue-600" />;
+  };
 
-      {/* Search + Add */}
-      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded px-3 py-2 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          + Add Customer
-        </button>
+  if (loading) {
+    return (
+      <div className="bg-white shadow-lg rounded-2xl p-6 min-h-96 flex items-center justify-center">
+        <div className="text-center">
+          <FaSpinner className="animate-spin w-8 h-8 text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading customers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-6 py-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center space-x-3">
+            <FaUsers className="w-6 h-6 text-white" />
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Customer Management</h3>
+          </div>
+          <div className="mt-3 sm:mt-0 flex items-center space-x-3">
+            <div className="bg-blue-500 bg-opacity-50 text-white px-3 py-1 rounded-full text-sm font-medium">
+              {filteredCustomers.length} Customers
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Error */}
-      {error && <p className="text-red-500 mb-2">{error}</p>}
+      {/* Content */}
+      <div className="p-4 sm:p-6">
+        {/* Search and Add Section */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="w-4 h-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+          </div>
 
-      {/* Loading */}
-      {loading ? (
-        <p className="text-center py-4">Loading...</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse">
-            <thead className="bg-blue-100">
-              <tr>
-                {["name", "email", "phone"].map((field) => (
-                  <th
-                    key={field}
-                    className="py-2 px-4 text-left font-medium cursor-pointer"
-                    onClick={() => handleSort(field)}
-                  >
-                    {field.charAt(0).toUpperCase() + field.slice(1)}
-                    {sortField === field
-                      ? sortOrder === "asc"
-                        ? " ▲"
-                        : " ▼"
-                      : ""}
-                  </th>
-                ))}
-                <th className="py-2 px-4 text-left font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedCustomers.map((customer) => (
-                <tr
-                  key={customer.id}
-                  className="border-b hover:bg-gray-50 transition"
-                >
-                  <td className="py-2 px-4">{customer.name}</td>
-                  <td className="py-2 px-4">{customer.email}</td>
-                  <td className="py-2 px-4">{customer.phone}</td>
-                  <td className="py-2 px-4 flex gap-2">
-                    <button
-                      onClick={() => handleEdit(customer)}
-                      className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(customer.id)}
-                      className="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {paginatedCustomers.length === 0 && (
+          {/* Add Button */}
+          <button
+            onClick={handleAdd}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            <FaPlus className="w-4 h-4" />
+            <span className="whitespace-nowrap">Add Customer</span>
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+            {error}
+          </div>
+        )}
+
+        {/* Desktop Table View */}
+        <div className="hidden lg:block">
+          <div className="overflow-hidden rounded-xl border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan="4" className="text-center py-4 text-gray-500">
-                    No customers found
-                  </td>
+                  {[
+                    { field: "name", label: "Name", icon: FaUser },
+                    { field: "email", label: "Email", icon: FaEnvelope },
+                    { field: "phone", label: "Phone", icon: FaPhone },
+                  ].map(({ field, label, icon: Icon }) => (
+                    <th
+                      key={field}
+                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleSort(field)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Icon className="w-4 h-4" />
+                        <span>{label}</span>
+                        {getSortIcon(field)}
+                      </div>
+                    </th>
+                  ))}
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {paginatedCustomers.map((customer) => (
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                          <FaUser className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="font-medium text-gray-900">{customer.name}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {customer.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {customer.phone}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(customer)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-lg transition-colors"
+                        >
+                          <FaEdit className="w-3 h-3" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(customer.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors"
+                        >
+                          <FaTrash className="w-3 h-3" />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {paginatedCustomers.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                      <FaUsers className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-lg font-medium mb-2">No customers found</p>
+                      <p className="text-sm">Try adjusting your search criteria</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
+          {paginatedCustomers.map((customer) => (
+            <div
+              key={customer.id}
+              className="bg-gray-50 rounded-xl p-4 border border-gray-200"
             >
-              {i + 1}
-            </button>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FaUser className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{customer.name}</h4>
+                    <p className="text-sm text-gray-500">Customer ID: {customer.id}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <FaEnvelope className="w-4 h-4 text-gray-400" />
+                  <span>{customer.email}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <FaPhone className="w-4 h-4 text-gray-400" />
+                  <span>{customer.phone}</span>
+                </div>
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleEdit(customer)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-lg transition-colors text-sm"
+                >
+                  <FaEdit className="w-3 h-3" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(customer.id)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors text-sm"
+                >
+                  <FaTrash className="w-3 h-3" />
+                  Delete
+                </button>
+              </div>
+            </div>
           ))}
+          {paginatedCustomers.length === 0 && (
+            <div className="text-center py-12">
+              <FaUsers className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-900 mb-2">No customers found</p>
+              <p className="text-sm text-gray-500">Try adjusting your search criteria</p>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-600">
+              Showing {(currentPage - 1) * perPage + 1} to{" "}
+              {Math.min(currentPage * perPage, filteredCustomers.length)} of{" "}
+              {filteredCustomers.length} customers
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <FaChevronLeft className="w-4 h-4" />
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => {
+                const page = i + 1;
+                const isCurrentPage = currentPage === page;
+                const shouldShow = 
+                  page === 1 || 
+                  page === totalPages || 
+                  Math.abs(page - currentPage) <= 1;
+                
+                if (!shouldShow && page !== 2 && page !== totalPages - 1) {
+                  if (page === currentPage - 2 || page === currentPage + 2) {
+                    return <span key={page} className="px-2">...</span>;
+                  }
+                  return null;
+                }
+                
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                      isCurrentPage
+                        ? "bg-blue-600 text-white"
+                        : "border border-gray-300 hover:bg-gray-50 text-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+              
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <FaChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Add / Edit Modal */}
       {(editingCustomer || addingCustomer) && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-96">
-            <h2 className="text-xl font-bold mb-4">
-              {addingCustomer ? "Add Customer" : "Edit Customer"}
-            </h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                {addingCustomer ? (
+                  <>
+                    <FaPlus className="w-5 h-5 text-green-600" />
+                    Add New Customer
+                  </>
+                ) : (
+                  <>
+                    <FaEdit className="w-5 h-5 text-blue-600" />
+                    Edit Customer
+                  </>
+                )}
+              </h2>
+            </div>
 
-            <label className="block mb-2 text-sm">Name</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="border rounded w-full px-3 py-2 mb-3"
-            />
+            {/* Modal Body */}
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaUser className="inline w-4 h-4 mr-1" />
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter customer name"
+                />
+              </div>
 
-            <label className="block mb-2 text-sm">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="border rounded w-full px-3 py-2 mb-3"
-            />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaEnvelope className="inline w-4 h-4 mr-1" />
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter email address"
+                />
+              </div>
 
-            <label className="block mb-2 text-sm">Phone</label>
-            <input
-              type="text"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              className="border rounded w-full px-3 py-2 mb-3"
-            />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaPhone className="inline w-4 h-4 mr-1" />
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={addingCustomer ? handleCreate : handleSave}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                {addingCustomer ? "Create" : "Save"}
-              </button>
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                onClick={addingCustomer ? handleCreate : handleSave}
+                className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors flex items-center gap-2"
+              >
+                {addingCustomer ? (
+                  <>
+                    <FaPlus className="w-4 h-4" />
+                    Create Customer
+                  </>
+                ) : (
+                  <>
+                    <FaEdit className="w-4 h-4" />
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </div>

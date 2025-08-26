@@ -100,5 +100,24 @@ router.get("/notifications", authenticate, async (req, res) => {
   }
 });
 
+// GET: User profile with address
+router.get("/profile", authenticate, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.userId, {
+      attributes: ["id", "name", "email", "phone", "address", "profileImage"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.toJSON());
+  } catch (err) {
+    console.error("Error fetching profile:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
 
 export default router;

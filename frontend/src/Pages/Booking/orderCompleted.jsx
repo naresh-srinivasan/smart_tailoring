@@ -1,7 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export default function OrderCompleted({ showConfetti, submittedOrder, resetForm }) {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
       {showConfetti && (
@@ -49,7 +52,7 @@ export default function OrderCompleted({ showConfetti, submittedOrder, resetForm
               Place New Order
             </button>
             <button
-              onClick={() => (window.location.href = "/orders")}
+              onClick={() => navigate("/dashboard/orders")}
               className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
             >
               View Orders

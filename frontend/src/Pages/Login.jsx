@@ -4,15 +4,63 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import ForgotPassword from "../Components/ForgotPassword";
 
-// Reusable input component
+// Professional input component with enhanced styling
 const InputField = ({ type = "text", placeholder, value, onChange, className = "" }) => (
-  <input
+  <div className="relative">
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      className={`w-full px-4 py-3.5 rounded-lg border border-gray-300 bg-gray-50 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                 focus:bg-white transition-all duration-200 text-gray-700
+                 placeholder-gray-400 ${className}`}
+    />
+  </div>
+);
+
+// Professional button component
+const PrimaryButton = ({ children, onClick, type = "button", disabled = false, loading = false }) => (
+  <button
     type={type}
-    placeholder={placeholder}
-    value={value}
-    onChange={onChange}
-    className={`w-full px-4 py-3 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
-  />
+    onClick={onClick}
+    disabled={disabled || loading}
+    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium py-3.5 px-4 
+               rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 
+               focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 
+               disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+  >
+    {loading ? (
+      <div className="flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+        {children}
+      </div>
+    ) : (
+      children
+    )}
+  </button>
+);
+
+// Professional select component
+const SelectField = ({ value, onChange, children, className = "" }) => (
+  <div className="relative">
+    <select
+      value={value}
+      onChange={onChange}
+      className={`w-full px-4 py-3.5 rounded-lg border border-gray-300 bg-gray-50 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                 focus:bg-white transition-all duration-200 text-gray-700 appearance-none
+                 bg-no-repeat bg-right pr-10 ${className}`}
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+        backgroundPosition: 'right 0.75rem center',
+        backgroundSize: '1.25rem 1.25rem'
+      }}
+    >
+      {children}
+    </select>
+  </div>
 );
 
 export default function AuthPage() {
@@ -188,9 +236,13 @@ export default function AuthPage() {
   // ----------------------
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-700 to-white">
-        <div className="w-16 h-16 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
-        <p className="mt-4 text-white text-lg font-semibold">Loading...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex flex-col items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <p className="text-white text-lg font-medium">Processing...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -199,15 +251,20 @@ export default function AuthPage() {
   // Render Auth Page
   // ----------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 to-white flex items-center justify-center p-6">
-      <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-3xl shadow-lg max-w-md w-full p-10 border border-blue-400 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-6">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full p-8 border border-white/20 relative overflow-hidden">
+        
+        {/* Decorative background elements */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
         
         {/* Back to Home Button */}
         <button
           onClick={() => navigate('/')}
-          className="absolute top-4 left-4 text-blue-600 hover:text-blue-800 transition-colors"
+          className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 
+                     rounded-full transition-all duration-200 group"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
         </button>
@@ -222,59 +279,78 @@ export default function AuthPage() {
               initial="enter" 
               animate="center" 
               exit="exit" 
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="relative z-10"
             >
-              <h1 className="text-4xl font-extrabold text-blue-800 mb-6 text-center tracking-wide" 
-                  style={{ fontFamily: "'Dancing Script', cursive" }}>
-                Login
-              </h1>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Welcome Back
+                </h1>
+                <p className="text-gray-600">Sign in to your account</p>
+              </div>
 
               {loginError && (
-                <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center font-semibold">
-                  {loginError}
+                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 text-center">
+                  <div className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    {loginError}
+                  </div>
                 </div>
               )}
 
               {forgotPassword ? (
                 <ForgotPassword onBack={() => setForgotPassword(false)} />
               ) : (
-                <form onSubmit={handleLoginSubmit} className="flex flex-col space-y-4">
-                  <InputField 
-                    type="email" 
-                    placeholder="Email" 
-                    value={loginEmail} 
-                    onChange={(e) => setLoginEmail(e.target.value)} 
-                  />
-                  <InputField 
-                    type="password" 
-                    placeholder="Password" 
-                    value={loginPassword} 
-                    onChange={(e) => setLoginPassword(e.target.value)} 
-                  />
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                  >
-                    {loading ? "Logging in..." : "Login"}
-                  </button>
-                  <div className="text-right">
+                <form onSubmit={handleLoginSubmit} className="space-y-6">
+                  <div className="space-y-4">
+                    <InputField 
+                      type="email" 
+                      placeholder="Email address" 
+                      value={loginEmail} 
+                      onChange={(e) => setLoginEmail(e.target.value)} 
+                    />
+                    <InputField 
+                      type="password" 
+                      placeholder="Password" 
+                      value={loginPassword} 
+                      onChange={(e) => setLoginPassword(e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end">
                     <button 
                       type="button" 
                       onClick={() => setForgotPassword(true)} 
-                      className="text-sm text-blue-600 hover:underline font-semibold focus:outline-none"
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
                     >
-                      Forgot Password?
+                      Forgot your password?
                     </button>
                   </div>
+
+                  <PrimaryButton 
+                    type="submit" 
+                    disabled={loading}
+                    loading={loading}
+                  >
+                    {loading ? "Signing in..." : "Sign In"}
+                  </PrimaryButton>
                 </form>
               )}
 
               {!forgotPassword && (
-                <p className="mt-6 text-center text-blue-700 font-semibold cursor-pointer hover:underline select-none" 
-                   onClick={() => setIsLogin(false)}>
-                  New user? Register here
-                </p>
+                <div className="mt-8 text-center">
+                  <p className="text-gray-600">
+                    Don't have an account?{" "}
+                    <button 
+                      onClick={() => setIsLogin(false)} 
+                      className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                    >
+                      Create account
+                    </button>
+                  </p>
+                </div>
               )}
             </motion.div>
           ) : (
@@ -286,20 +362,28 @@ export default function AuthPage() {
               initial="enter" 
               animate="center" 
               exit="exit" 
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="relative z-10"
             >
-              <h1 className="text-4xl font-extrabold text-blue-800 mb-6 text-center tracking-wide" 
-                  style={{ fontFamily: "'Dancing Script', cursive" }}>
-                New Registration
-              </h1>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Create Account
+                </h1>
+                <p className="text-gray-600">Join us today and get started</p>
+              </div>
 
               {regError && (
-                <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center font-semibold">
-                  {regError}
+                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 text-center">
+                  <div className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    {regError}
+                  </div>
                 </div>
               )}
 
-              <form onSubmit={handleRegSubmit} className="flex flex-col space-y-4">
+              <form onSubmit={handleRegSubmit} className="space-y-5">
                 <InputField 
                   placeholder="Full Name" 
                   value={regName} 
@@ -307,7 +391,7 @@ export default function AuthPage() {
                 />
                 <InputField 
                   type="email" 
-                  placeholder="Email" 
+                  placeholder="Email address" 
                   value={regEmail} 
                   onChange={(e) => setRegEmail(e.target.value)} 
                 />
@@ -323,31 +407,38 @@ export default function AuthPage() {
                   value={regConfirmPassword} 
                   onChange={(e) => setRegConfirmPassword(e.target.value)} 
                 />
-                <select 
-                  value={regRole} 
-                  onChange={(e) => setRegRole(e.target.value)} 
-                  className="w-full px-4 py-3 rounded-lg border border-blue-300 bg-white text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Customer">Customer</option>
-                  <option value="Admin">Admin</option>
-                </select>
-                <button 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Account Type
+                  </label>
+                  <SelectField 
+                    value={regRole} 
+                    onChange={(e) => setRegRole(e.target.value)}
+                  >
+                    <option value="Customer">Customer</option>
+                    <option value="Admin">Admin</option>
+                  </SelectField>
+                </div>
+
+                <PrimaryButton 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                  loading={loading}
                 >
-                  {loading ? "Registering..." : "Register"}
-                </button>
+                  {loading ? "Creating account..." : "Create Account"}
+                </PrimaryButton>
               </form>
 
-              <div className="mt-6 text-center text-sm text-gray-600">
-                Already signed in?{" "}
-                <button 
-                  onClick={() => setIsLogin(true)} 
-                  className="text-blue-600 hover:text-blue-800 font-semibold focus:outline-none"
-                >
-                  Login here
-                </button>
+              <div className="mt-8 text-center">
+                <p className="text-gray-600">
+                  Already have an account?{" "}
+                  <button 
+                    onClick={() => setIsLogin(true)} 
+                    className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  >
+                    Sign in
+                  </button>
+                </p>
               </div>
             </motion.div>
           )}

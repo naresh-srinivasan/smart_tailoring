@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { FaUser, FaEnvelope, FaPhone, FaComment } from "react-icons/fa";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -18,93 +19,105 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("Sending...");
-    // Simulate sending
-   try {
-    const response = await fetch("http://localhost:5000/send-contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch("http://localhost:5000/send-contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    if (response.ok) {
-      setStatus("Message sent! Thank you.");
-      setFormData({ name: "", email: "", phone: "", query: "" });
-    } else {
-      setStatus("Failed to send message. Try again.");
+      if (response.ok) {
+        setStatus("Message sent! Thank you.");
+        setFormData({ name: "", email: "", phone: "", query: "" });
+      } else {
+        setStatus("Failed to send message. Try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setStatus("Error sending message.");
     }
-  } catch (error) {
-    console.error("Error:", error);
-    setStatus("Error sending message.");}
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#d6ba73] via-white to-[#f0f6fa] pt-20 px-10 pb-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-200 p-6 md:p-20 flex items-center justify-center">
       <motion.div
-        className="max-w-7xl mx-auto bg-white rounded-3xl shadow-lg p-10 flex flex-col md:flex-row gap-10"
-        initial={{ opacity: 0, y: 20 }}
+        className="max-w-7xl w-full bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Left Side - Contact Form */}
-        <div className="flex-1">
-          <h1
-            className="text-4xl font-extrabold mb-8 text-[#286fad]"
-            style={{ fontFamily: "'Dancing Script', cursive" }}
-          >
-            Contact Us
+        {/* Contact Form */}
+        <div className="flex-1 p-10 md:p-16 bg-gradient-to-b from-white to-gray-50">
+          <h1 className="text-4xl font-bold text-gray-800 mb-6">
+            Get in Touch
           </h1>
+          <p className="text-gray-500 mb-10">
+            Have a question or need support? Fill out the form below and we’ll get back to you shortly.
+          </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-3 rounded-lg border border-[#d6ba73] focus:outline-none focus:ring-2 focus:ring-[#d6ba73] text-[#286fad]"
-            />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="relative">
+              <FaUser className="absolute top-3 left-4 text-gray-400" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+            </div>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-3 rounded-lg border border-[#d6ba73] focus:outline-none focus:ring-2 focus:ring-[#d6ba73] text-[#286fad]"
-            />
+            <div className="relative">
+              <FaEnvelope className="absolute top-3 left-4 text-gray-400" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+            </div>
 
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone Number"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-5 py-3 rounded-lg border border-[#d6ba73] focus:outline-none focus:ring-2 focus:ring-[#d6ba73] text-[#286fad]"
-            />
+            <div className="relative">
+              <FaPhone className="absolute top-3 left-4 text-gray-400" />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+            </div>
 
-            <textarea
-              name="query"
-              placeholder="Your Query"
-              rows="5"
-              value={formData.query}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-3 rounded-lg border border-[#d6ba73] focus:outline-none focus:ring-2 focus:ring-[#d6ba73] text-[#286fad]"
-            ></textarea>
+            <div className="relative">
+              <FaComment className="absolute top-3 left-4 text-gray-400" />
+              <textarea
+                name="query"
+                placeholder="Your Message"
+                rows="5"
+                value={formData.query}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              ></textarea>
+            </div>
 
             <button
               type="submit"
-              className="w-full bg-[#286fad] hover:bg-[#1f5685] text-white py-3 rounded-lg font-semibold text-lg transition"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold text-lg shadow-lg transition transform hover:-translate-y-0.5"
             >
-              Send
+              Send Message
             </button>
           </form>
 
           {status && (
             <motion.p
-              className="mt-5 text-center text-[#d6ba73] font-semibold"
+              className="mt-5 text-center text-blue-600 font-medium"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -113,9 +126,9 @@ export default function Contact() {
           )}
         </div>
 
-        {/* Right Side - Map */}
+        {/* Map */}
         <motion.div
-          className="flex-1 h-96 rounded-2xl overflow-hidden shadow-lg"
+          className="flex-1 h-96 md:h-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}

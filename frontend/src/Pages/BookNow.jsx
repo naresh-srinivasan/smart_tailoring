@@ -25,6 +25,7 @@ export default function BookNow() {
 
   const [material, setMaterial] = useState("");
   const [color, setColor] = useState("");
+  const [pattern, setPattern] = useState("");
   const [collarType, setCollarType] = useState("");
   const [sleeveType, setSleeveType] = useState("");
   const [buttonType, setButtonType] = useState("");
@@ -32,6 +33,9 @@ export default function BookNow() {
 
   const [measurementUnit, setMeasurementUnit] = useState("cm");
   const [materialNeeded, setMaterialNeeded] = useState(0);
+  
+  // Add new state for material price per meter from inventory
+  const [materialPricePerMeter, setMaterialPricePerMeter] = useState(0);
 
   const [currency, setCurrency] = useState("INR");
   const [conversionRates, setConversionRates] = useState({ INR: 1 });
@@ -57,6 +61,7 @@ export default function BookNow() {
   /* ---------------- Constants ---------------- */
   const DELIVERY_CHARGE = 50;
   const LABOUR_CHARGE = 100;
+  const INTERNET_HANDLING_FEES = 30;
   const API_BASE = "http://localhost:5000/api";
 
   /* ---------------- Fetch user profile ---------------- */
@@ -104,17 +109,40 @@ export default function BookNow() {
     fetchConversionRates();
   }, []);
 
+  /* ---------------- Update Material Price when Material/Color Changes ---------------- */
+  useEffect(() => {
+    if (material && color && inventory.length > 0) {
+      const selectedInventoryItem = inventory.find(
+        (item) =>
+          item.material_name?.toLowerCase() === material.toLowerCase() &&
+          item.color?.toLowerCase() === color.toLowerCase()
+      );
+      
+      if (selectedInventoryItem) {
+        setMaterialPricePerMeter(selectedInventoryItem.price || 0);
+        console.log(`Material price updated: ${selectedInventoryItem.price}/meter for ${material} - ${color}`);
+      } else {
+        setMaterialPricePerMeter(0);
+        console.log(`No inventory item found for ${material} - ${color}`);
+      }
+    } else {
+      setMaterialPricePerMeter(0);
+    }
+  }, [material, color, inventory]);
+
   /* ---------------- Step Handlers ---------------- */
   const handleGenderSelect = (g) => {
     setGender(g);
     setDressType("");
     setMaterial("");
     setColor("");
+    setPattern("");
     setCollarType("");
     setSleeveType("");
     setButtonType("");
     setButtonColor("");
     setFormData({});
+    setMaterialPricePerMeter(0);
     setStep(2);
   };
 
@@ -127,6 +155,7 @@ export default function BookNow() {
     measurements.forEach((m) => (initialData[m.name] = ""));
     setFormData(initialData);
     setMaterialNeeded(0);
+    setMaterialPricePerMeter(0);
     setStep(3);
   };
 
@@ -190,15 +219,29 @@ export default function BookNow() {
         .filter((ex) => ex.selected)
         .reduce((sum, ex) => sum + ex.cost, 0) || 0;
 
-    const materialPrice =
-      material && materialCosts[material]
-        ? parseFloat(materialCosts[material]) * parseFloat(materialNeeded || 0)
-        : 0;
+    // Use dynamic material price from selected inventory item
+    const materialPrice = materialPricePerMeter * parseFloat(materialNeeded || 0);
 
-    let total = base + extrasSum + materialPrice + DELIVERY_CHARGE + LABOUR_CHARGE;
+    // Include complementary item cost from formData
+    const complementaryCost = formData.complementaryItemCost ? parseFloat(formData.complementaryItemCost) : 0;
+
+    let total = base + extrasSum + materialPrice + DELIVERY_CHARGE + LABOUR_CHARGE + INTERNET_HANDLING_FEES + complementaryCost;
     if (discount > 0) total = total - total * (discount / 100);
+    
+    console.log('Total Cost Calculation:', {
+      base,
+      extrasSum,
+      materialPrice: `${materialPricePerMeter} × ${materialNeeded} = ${materialPrice}`,
+      complementaryCost,
+      DELIVERY_CHARGE,
+      LABOUR_CHARGE,
+      INTERNET_HANDLING_FEES,
+      discount,
+      total
+    });
+    
     return total;
-  }, [materialNeeded, material, dressType, gender, discount]);
+  }, [materialNeeded, materialPricePerMeter, dressType, gender, discount, formData.complementaryItemCost]);
 
   /* ---------------- UI Helpers ---------------- */
   const toggleInstruction = (name) =>
@@ -232,7 +275,6 @@ export default function BookNow() {
   /* ---------------- Submit Order ---------------- */
   const handleFinalSubmit = async () => {
     if (isSubmitting) return;
-    if (!deliveryAddress.trim()) return alert("Enter delivery address");
     if (!expectedDate) return alert("Select expected date");
 
     setIsSubmitting(true);
@@ -271,7 +313,10 @@ export default function BookNow() {
         },
         material,
         color,
+        pattern,
         material_needed: materialNeeded,
+        material_price_per_meter: materialPricePerMeter,
+        total_material_cost: materialPricePerMeter * materialNeeded,
         extras: extrasSelected,
         delivery_address: deliveryAddress,
         expected_date: expectedDate,
@@ -291,6 +336,18 @@ export default function BookNow() {
         body: JSON.stringify(orderData),
       });
       if (!response.ok) throw new Error("Failed to submit order");
+
+      const orderResult = await response.json();
+      await fetch(`${API_BASE}/notifications`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          message: `New order placed by ${userProfile.name || "Customer"} for ${dressType}`,
+        }),
+      });
 
       // update inventory
       await fetch(`${API_BASE}/inventory/${inventoryItem.id}`, {
@@ -314,7 +371,7 @@ export default function BookNow() {
         const updatedInventory = await fetch(`${API_BASE}/inventory`);
         const invData = await updatedInventory.json();
         setInventory(invData.items || []);
-      } catch {}
+      } catch { }
     } catch (err) {
       alert(err.message || "Failed to submit order");
     } finally {
@@ -331,12 +388,14 @@ export default function BookNow() {
     setShowInstructions({});
     setMaterial("");
     setColor("");
+    setPattern("");
     setCollarType("");
     setSleeveType("");
     setButtonType("");
     setButtonColor("");
     setMeasurementUnit("cm");
     setMaterialNeeded(0);
+    setMaterialPricePerMeter(0);
     setDeliveryAddress("");
     setExpectedDate("");
     setUseProfileAddress(false);
@@ -370,7 +429,7 @@ export default function BookNow() {
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
       <motion.div
-        className="max-w-5xl mx-auto bg-white rounded-3xl p-10 shadow-2xl"
+        className="max-w-6xl mx-auto bg-white rounded-3xl p-10 shadow-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -400,6 +459,8 @@ export default function BookNow() {
             setMaterial={setMaterial}
             color={color}
             setColor={setColor}
+            pattern={pattern}
+            setPattern={setPattern}
             collarType={collarType}
             setCollarType={setCollarType}
             sleeveType={sleeveType}
@@ -432,12 +493,20 @@ export default function BookNow() {
             materialNeeded={materialNeeded}
             materialCosts={materialCosts}
             material={material}
+            color={color}
+            materialPricePerMeter={materialPricePerMeter}
             totalCost={totalCost}
             currency={currency}
+            pattern={pattern}
             setCurrency={setCurrency}
             conversionRate={conversionRates[currency] || 1}
             DELIVERY_CHARGE={DELIVERY_CHARGE}
             LABOUR_CHARGE={LABOUR_CHARGE}
+            collarType={collarType}
+            sleeveType={sleeveType}
+            buttonType={buttonType}
+            buttonColor={buttonColor}
+            INTERNET_HANDLING_FEES={INTERNET_HANDLING_FEES}
             onBack={() => setStep(3)}
             onSubmit={proceedToSummary}
           />
@@ -449,8 +518,10 @@ export default function BookNow() {
             dressType={dressType}
             material={material}
             color={color}
+            pattern={pattern}
             measurementUnit={measurementUnit}
             materialNeeded={materialNeeded}
+            materialPricePerMeter={materialPricePerMeter}
             collarType={collarType}
             sleeveType={sleeveType}
             buttonType={buttonType}

@@ -7,11 +7,12 @@ const Measurement = sequelize.define("Measurement", {
     primaryKey: true,
     autoIncrement: true,
   },
-  user_id: {
+  userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'user_id', // This maps userId in code to user_id in database
   },
-  dress_type: {
+  person_name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -20,7 +21,7 @@ const Measurement = sequelize.define("Measurement", {
     allowNull: false,
   },
   data: {
-    type: DataTypes.JSONB,  // Store the entire object
+    type: DataTypes.JSONB,  // Store the entire measurement object
     allowNull: true,
   },
 }, {

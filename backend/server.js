@@ -12,13 +12,63 @@ import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import notificationsRoutes from "./routes/notificationsRoutes.js";
-import PromoCodeRoutes from "./routes/PromoCodeRoutes.js";
 import pkg from "pg";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import http from "http";
+import { Server } from "socket.io";
+import PromoCodeRoutes from "./routes/PromoCodeRoutes.js"
 
 const { Pool } = pkg;
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT"],
+    credentials: true,
+  },
+});
+
+// Track connected users
+const connectedUsers = {};
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
+
+  // Register userId for real-time notifications
+  socket.on("register-user", (userId) => {
+    connectedUsers[userId] = socket.id;
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+    for (const [userId, sId] of Object.entries(connectedUsers)) {
+      if (sId === socket.id) delete connectedUsers[userId];
+    }
+  });
+});
+
+// Make Socket.IO accessible in routes
+app.set("io", io);
+app.set("connectedUsers", connectedUsers);
+
+// Swagger Configuration
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Smart Tailoring API",
+      version: "1.0.0",
+      description: "API documentation for Smart Tailoring project",
+    },
+    servers: [{ url: "http://localhost:5000" }],
+  },
+  apis: ["./routes/*.js"],
+};
+const swaggerSpec = swaggerJsdoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middlewares
 app.use(cors({
@@ -37,22 +87,6 @@ const pool = new Pool({
   password: process.env.DB_PASS,
   port: 5432,
 });
-
-// Swagger Configuration
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Smart Tailoring API",
-      version: "1.0.0",
-      description: "API documentation for Smart Tailoring project",
-    },
-    servers: [{ url: "http://localhost:5000" }],
-  },
-  apis: ["./routes/*.js"],
-};
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Contact form
 app.post("/send-contact", async (req, res) => {
@@ -92,14 +126,15 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/notifications", notificationsRoutes);
-app.use("/api/promo", PromoCodeRoutes);
+app.use("/api/promo",PromoCodeRoutes);
 
 // Sync Sequelize models and start server
 sequelize.sync({ alter: true })
   .then(() => {
     console.log("Tables synced successfully");
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    server.listen(process.env.PORT || 5000, () => {
+      console.log(`Server running on port ${process.env.PORT || 5000}`);
+    });
   })
   .catch((err) => {
     console.error("Failed to sync tables:", err);

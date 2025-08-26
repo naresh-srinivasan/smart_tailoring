@@ -58,6 +58,7 @@ export default function StyleAndMaterialStep({
                 material: item.material_name,
                 image: item.image_url || null,
                 price: item.price || 0,
+                original_price: item.original_price || item.price || 0,
                 total_quantity: item.total_quantity || 0,
             }));
     };
@@ -70,7 +71,85 @@ export default function StyleAndMaterialStep({
         setPattern(combination.pattern);
     };
 
+    // Function to calculate discount percentage
+    const calculateDiscount = (originalPrice, currentPrice) => {
+        if (!originalPrice || originalPrice <= currentPrice) return 0;
+        return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+    };
+
+    // Function to format currency
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+        }).format(price);
+    };
+
+    // Function to convert color names or values to hex format
+    const getColorHex = (colorValue) => {
+        if (colorValue && colorValue.startsWith('#')) {
+            return colorValue;
+        }
+        
+        const colorMap = {
+            'red': '#FF0000',
+            'blue': '#0000FF',
+            'green': '#008000',
+            'yellow': '#FFFF00',
+            'black': '#000000',
+            'white': '#FFFFFF',
+            'gray': '#808080',
+            'grey': '#808080',
+            'purple': '#800080',
+            'orange': '#FFA500',
+            'pink': '#FFC0CB',
+            'brown': '#A52A2A',
+            'navy': '#000080',
+            'maroon': '#800000',
+            'olive': '#808000',
+            'lime': '#00FF00',
+            'aqua': '#00FFFF',
+            'teal': '#008080',
+            'silver': '#C0C0C0',
+            'fuchsia': '#FF00FF',
+        };
+        
+        const colorName = colorValue ? colorValue.toLowerCase() : '';
+        return colorMap[colorName] || '#3b82f6';
+    };
+
     const createPatternPreview = (color, pattern) => {
+        const hexColor = getColorHex(color);
+        
+        const getStripeColors = (baseColor) => {
+            const colorLower = baseColor.toLowerCase();
+            
+            if (colorLower === '#ffff00' || colorLower === 'yellow') {
+                return {
+                    baseColor: '#ffd700',
+                    stripeColor: '#b8860b',
+                    lightStripe: '#fff8dc'
+                };
+            }
+            
+            if (colorLower === '#ffffff' || colorLower === 'white') {
+                return {
+                    baseColor: baseColor,
+                    stripeColor: '#cccccc',
+                    lightStripe: '#f0f0f0'
+                };
+            }
+            
+            return {
+                baseColor: baseColor,
+                stripeColor: baseColor,
+                lightStripe: 'rgba(255,255,255,0.4)'
+            };
+        };
+        
+        const { baseColor: adjustedBase, stripeColor, lightStripe } = getStripeColors(hexColor);
+        
         const baseStyle = {
             width: "100%",
             height: "80px",
@@ -79,7 +158,7 @@ export default function StyleAndMaterialStep({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: color.startsWith("#") ? color : "#f3f4f6",
+            backgroundColor: adjustedBase,
         };
 
         switch (pattern?.toLowerCase()) {
@@ -92,10 +171,10 @@ export default function StyleAndMaterialStep({
                             style={{
                                 background: `repeating-linear-gradient(
                                     45deg,
-                                    ${color.startsWith("#") ? color : "#3b82f6"},
-                                    ${color.startsWith("#") ? color : "#3b82f6"} 10px,
-                                    rgba(255,255,255,0.3) 10px,
-                                    rgba(255,255,255,0.3) 20px
+                                    ${stripeColor},
+                                    ${stripeColor} 8px,
+                                    ${lightStripe} 8px,
+                                    ${lightStripe} 16px
                                 )`,
                             }}
                         />
@@ -108,9 +187,10 @@ export default function StyleAndMaterialStep({
                         <div
                             className="w-full h-full relative overflow-hidden rounded-md"
                             style={{
-                                backgroundColor: color.startsWith("#") ? color : "#3b82f6",
-                                backgroundImage:
-                                    "radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px)",
+                                backgroundColor: adjustedBase,
+                                backgroundImage: hexColor.toLowerCase() === '#ffff00' || color.toLowerCase() === 'yellow'
+                                    ? "radial-gradient(circle, rgba(184,134,11,0.8) 2px, transparent 2px)"
+                                    : "radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px)",
                                 backgroundSize: "15px 15px",
                             }}
                         />
@@ -124,12 +204,12 @@ export default function StyleAndMaterialStep({
                             className="w-full h-full relative overflow-hidden rounded-md"
                             style={{
                                 background: `conic-gradient(from 90deg at 50% 50%, 
-                                    ${color.startsWith("#") ? color : "#3b82f6"} 90deg, 
-                                    rgba(255,255,255,0.5) 90deg, 
-                                    rgba(255,255,255,0.5) 180deg, 
-                                    ${color.startsWith("#") ? color : "#3b82f6"} 180deg, 
-                                    ${color.startsWith("#") ? color : "#3b82f6"} 270deg, 
-                                    rgba(255,255,255,0.5) 270deg)`,
+                                    ${stripeColor} 90deg, 
+                                    ${lightStripe} 90deg, 
+                                    ${lightStripe} 180deg, 
+                                    ${stripeColor} 180deg, 
+                                    ${stripeColor} 270deg, 
+                                    ${lightStripe} 270deg)`,
                                 backgroundSize: "20px 20px",
                             }}
                         />
@@ -140,9 +220,13 @@ export default function StyleAndMaterialStep({
                     <div style={baseStyle}>
                         <div
                             className="w-full h-full relative overflow-hidden rounded-md flex items-center justify-center"
-                            style={{ backgroundColor: color.startsWith("#") ? color : "#3b82f6" }}
+                            style={{ backgroundColor: adjustedBase }}
                         >
-                            <div className="text-white text-xl opacity-70">🌸</div>
+                            <div className={`text-xl opacity-70 ${
+                                hexColor.toLowerCase() === '#ffff00' || color.toLowerCase() === 'yellow' 
+                                    ? 'text-amber-800' 
+                                    : 'text-white'
+                            }`}>🌸</div>
                         </div>
                     </div>
                 );
@@ -150,7 +234,11 @@ export default function StyleAndMaterialStep({
             default:
                 return (
                     <div style={baseStyle}>
-                        <span className="text-gray-500 font-medium">Solid</span>
+                        <span className={`font-medium drop-shadow-md ${
+                            hexColor.toLowerCase() === '#ffff00' || color.toLowerCase() === 'yellow'
+                                ? 'text-amber-800'
+                                : 'text-white text-opacity-70'
+                        }`}>Solid</span>
                     </div>
                 );
         }
@@ -188,79 +276,103 @@ export default function StyleAndMaterialStep({
                         Available Color & Pattern Combinations
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {availableCombinations.map((combination, index) => (
-                            <div
-                                key={`${combination.id}-${index}`}
-                                onClick={() => handleCombinationSelect(combination)}
-                                className={`cursor-pointer border-2 rounded-lg p-3 transition-all duration-200 hover:shadow-md ${
-                                    selectedCombination?.id === combination.id
-                                        ? "border-blue-500 bg-blue-50 shadow-md"
-                                        : "border-gray-200 hover:border-gray-300"
-                                }`}
-                            >
-                                <div className="mb-3">
-                                    {combination.image ? (
-                                        <img
-                                            src={combination.image}
-                                            alt={`${combination.color} ${combination.pattern}`}
-                                            className="w-full h-20 object-cover rounded-md border"
-                                            onError={(e) => {
-                                                e.target.style.display = "none";
-                                                e.target.nextSibling.style.display = "block";
-                                            }}
-                                        />
-                                    ) : null}
-                                    <div style={{ display: combination.image ? "none" : "block" }}>
-                                        {createPatternPreview(combination.color, combination.pattern, combination.price)}
+                        {availableCombinations.map((combination, index) => {
+                            const hexColor = getColorHex(combination.color);
+                            const discountPercentage = calculateDiscount(combination.original_price, combination.price);
+                            const hasDiscount = discountPercentage > 0;
+                            
+                            return (
+                                <div
+                                    key={`${combination.id}-${index}`}
+                                    onClick={() => handleCombinationSelect(combination)}
+                                    className={`cursor-pointer border-2 rounded-lg p-3 transition-all duration-200 hover:shadow-md ${
+                                        selectedCombination?.id === combination.id
+                                            ? "border-blue-500 bg-blue-50 shadow-md"
+                                            : "border-gray-200 hover:border-gray-300"
+                                    }`}
+                                >
+                                    <div className="mb-3">
+                                        {combination.image ? (
+                                            <img
+                                                src={combination.image}
+                                                alt={`${combination.color} ${combination.pattern}`}
+                                                className="w-full h-20 object-cover rounded-md border"
+                                                onError={(e) => {
+                                                    e.target.style.display = "none";
+                                                    e.target.nextSibling.style.display = "block";
+                                                }}
+                                            />
+                                        ) : null}
+                                        <div style={{ display: combination.image ? "none" : "block" }}>
+                                            {createPatternPreview(combination.color, combination.pattern)}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <div
-                                            className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
-                                            style={{
-                                                backgroundColor: combination.color.startsWith("#")
-                                                    ? combination.color
-                                                    : "transparent",
-                                                border: combination.color.startsWith("#")
-                                                    ? `2px solid ${combination.color}`
-                                                    : "2px solid #d1d5db",
-                                            }}
-                                        />
-                                        <span className="text-sm font-medium text-gray-800 truncate">
-                                            {combination.color}
-                                        </span>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0 shadow-sm"
+                                                style={{
+                                                    backgroundColor: hexColor,
+                                                    borderColor: hexColor === '#FFFFFF' ? '#d1d5db' : hexColor,
+                                                }}
+                                            />
+                                            <span className="text-sm font-medium text-gray-800 truncate capitalize">
+                                                {combination.color}
+                                            </span>
+                                        </div>
+                                        <div className="text-sm text-gray-600 capitalize">
+                                            {combination.pattern || "Solid"}
+                                        </div>
+
+                                        {/* Enhanced Price Display with Discount */}
+                                        <div className="space-y-1">
+                                            {hasDiscount ? (
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-xs text-gray-500 line-through">
+                                                        {formatPrice(combination.original_price)}
+                                                    </span>
+                                                    <span className="text-sm font-bold text-red-600">
+                                                        {formatPrice(combination.price)}
+                                                    </span>
+                                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                                                        {discountPercentage}% OFF
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm font-bold text-gray-800">
+                                                    {formatPrice(combination.price)}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {combination.total_quantity !== undefined && (
+                                            <div
+                                                className={`text-xs ${
+                                                    combination.total_quantity > 0 ? "text-green-600" : "text-red-500"
+                                                }`}
+                                            >
+                                                {combination.total_quantity > 0
+                                                    ? `${combination.total_quantity} m available`
+                                                    : "Out of stock"}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="text-sm text-gray-600 capitalize">
-                                        {combination.pattern || "Solid"}
-                                    </div>
-                                    {combination.total_quantity !== undefined && (
-                                        <div
-                                            className={`text-xs ${
-                                                combination.total_quantity > 0 ? "text-green-600" : "text-red-500"
-                                            }`}
-                                        >
-                                            {combination.total_quantity > 0
-                                                ? `${combination.total_quantity} m available`
-                                                : "Out of stock"}
+
+                                    {selectedCombination?.id === combination.id && (
+                                        <div className="mt-2 flex justify-center">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                         </div>
                                     )}
                                 </div>
-
-                                {selectedCombination?.id === combination.id && (
-                                    <div className="mt-2 flex justify-center">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     {selectedCombination && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
                             <h4 className="font-medium text-blue-900 mb-2">Selected Combination:</h4>
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-4 text-sm flex-wrap">
                                 <span>
                                     <strong>Material:</strong> {selectedCombination.material}
                                 </span>
@@ -270,6 +382,32 @@ export default function StyleAndMaterialStep({
                                 <span>
                                     <strong>Pattern:</strong> {selectedCombination.pattern}
                                 </span>
+                                <div
+                                    className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
+                                    style={{
+                                        backgroundColor: getColorHex(selectedCombination.color),
+                                    }}
+                                />
+                                <div className="flex items-center gap-2">
+                                    <strong>Price:</strong>
+                                    {calculateDiscount(selectedCombination.original_price, selectedCombination.price) > 0 ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-500 line-through text-sm">
+                                                {formatPrice(selectedCombination.original_price)}
+                                            </span>
+                                            <span className="text-red-600 font-bold">
+                                                {formatPrice(selectedCombination.price)}
+                                            </span>
+                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                                {calculateDiscount(selectedCombination.original_price, selectedCombination.price)}% OFF
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="font-bold">
+                                            {formatPrice(selectedCombination.price)}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

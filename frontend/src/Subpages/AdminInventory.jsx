@@ -11,6 +11,7 @@ export default function AdminInventory() {
     material_name: "",
     color: "",
     material_type: "",
+    pattern: "",
     price: "",
     total_quantity: "",
   });
@@ -19,6 +20,7 @@ export default function AdminInventory() {
     material_name: "",
     color: "",
     material_type: "",
+    pattern: "",
   });
 
   const [editingItem, setEditingItem] = useState(null);
@@ -68,7 +70,7 @@ export default function AdminInventory() {
   };
 
   const resetFilters = () => {
-    setFilters({ material_name: "", color: "", material_type: "" });
+    setFilters({ material_name: "", color: "", material_type: "", pattern: "" });
   };
 
   const handleAddClick = () => {
@@ -78,6 +80,7 @@ export default function AdminInventory() {
       material_name: "",
       color: "",
       material_type: "",
+      pattern: "",
       price: "",
       total_quantity: "",
     });
@@ -90,6 +93,7 @@ export default function AdminInventory() {
       material_name: item.material_name || "",
       color: item.color || "",
       material_type: item.material_type || "",
+      pattern: item.pattern || "",
       price: item.price || "",
       total_quantity: item.total_quantity || "",
     });
@@ -109,6 +113,7 @@ export default function AdminInventory() {
         material_name: "",
         color: "",
         material_type: "",
+        pattern: "",
         price: "",
         total_quantity: "",
       });
@@ -141,27 +146,34 @@ export default function AdminInventory() {
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Inventory Management</h1>
 
       {/* Filters + Add button */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <input
           placeholder="Material Name"
           name="material_name"
           value={filters.material_name}
           onChange={handleFilterChange}
-          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm"
         />
         <input
           placeholder="Color"
           name="color"
           value={filters.color}
           onChange={handleFilterChange}
-          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm"
         />
         <input
           placeholder="Material Type"
           name="material_type"
           value={filters.material_type}
           onChange={handleFilterChange}
-          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm"
+        />
+        <input
+          placeholder="Pattern"
+          name="pattern"
+          value={filters.pattern}
+          onChange={handleFilterChange}
+          className="border border-gray-300 p-3 rounded-lg shadow-sm"
         />
         <button
           type="button"
@@ -183,7 +195,7 @@ export default function AdminInventory() {
       {(showAddForm || editingItem) && (
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 bg-white p-6 rounded-lg shadow-md"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 bg-white p-6 rounded-lg shadow-md"
         >
           <input
             name="material_name"
@@ -191,7 +203,7 @@ export default function AdminInventory() {
             value={form.material_name}
             onChange={(e) => setForm({ ...form, material_name: e.target.value })}
             required
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 p-3 rounded-lg shadow-sm"
           />
           <input
             name="color"
@@ -199,7 +211,7 @@ export default function AdminInventory() {
             value={form.color}
             onChange={(e) => setForm({ ...form, color: e.target.value })}
             required
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 p-3 rounded-lg shadow-sm"
           />
           <input
             name="material_type"
@@ -207,7 +219,15 @@ export default function AdminInventory() {
             value={form.material_type}
             onChange={(e) => setForm({ ...form, material_type: e.target.value })}
             required
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 p-3 rounded-lg shadow-sm"
+          />
+          <input
+            name="pattern"
+            placeholder="Pattern"
+            value={form.pattern}
+            onChange={(e) => setForm({ ...form, pattern: e.target.value })}
+            required
+            className="border border-gray-300 p-3 rounded-lg shadow-sm"
           />
           <input
             name="price"
@@ -216,7 +236,7 @@ export default function AdminInventory() {
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
             required
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 p-3 rounded-lg shadow-sm"
           />
           <input
             name="total_quantity"
@@ -225,12 +245,12 @@ export default function AdminInventory() {
             value={form.total_quantity}
             onChange={(e) => setForm({ ...form, total_quantity: e.target.value })}
             required
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 p-3 rounded-lg shadow-sm"
           />
           <button
             type="submit"
             disabled={submitting}
-            className="col-span-1 sm:col-span-2 lg:col-span-5 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+            className="col-span-1 sm:col-span-2 lg:col-span-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
           >
             {submitting ? "Saving..." : editingItem ? "Update Item" : "Add Item"}
           </button>
@@ -242,9 +262,11 @@ export default function AdminInventory() {
         <table className="min-w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs uppercase tracking-wider">
             <tr>
+              <th className="px-6 py-3 text-left">S.No</th>
               <th className="px-6 py-3 text-left">Material Name</th>
               <th className="px-6 py-3 text-left">Color</th>
               <th className="px-6 py-3 text-left">Material Type</th>
+              <th className="px-6 py-3 text-left">Pattern</th>
               <th className="px-6 py-3 text-right">Price (₹)</th>
               <th className="px-6 py-3 text-right">Quantity</th>
               <th className="px-6 py-3 text-center">Actions</th>
@@ -254,9 +276,11 @@ export default function AdminInventory() {
             {filteredInventory.length ? (
               filteredInventory.map((item, idx) => (
                 <tr key={item.id || idx} className="border-b hover:bg-gray-50 transition">
+                  <td className="px-6 py-4">{idx + 1}</td>
                   <td className="px-6 py-4">{item.material_name}</td>
                   <td className="px-6 py-4">{item.color}</td>
                   <td className="px-6 py-4">{item.material_type}</td>
+                  <td className="px-6 py-4">{item.pattern}</td>
                   <td className="px-6 py-4 text-right">₹{Number(item.price || 0).toFixed(2)}</td>
                   <td className="px-6 py-4 text-right">{item.total_quantity}</td>
                   <td className="px-6 py-4 flex justify-center gap-2">
@@ -277,7 +301,7 @@ export default function AdminInventory() {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
                   No items found
                 </td>
               </tr>

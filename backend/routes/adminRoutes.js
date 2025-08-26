@@ -3,7 +3,7 @@ import express from "express";
 import User from "../models/User.js";
 import { authenticate } from "./authRoutes.js";
 import Order from "../models/Order.js";
-import { fn, col, literal } from "sequelize";
+import { fn, col, literal, Op} from "sequelize";
 import bcrypt from "bcryptjs";
 
 
@@ -196,5 +196,33 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
+// GET daily revenue excluding cancelled orders
+router.get("/orders/daily-revenue", authenticate, async (req, res) => {
+  try {
+    const results = await Order.findAll({
+      attributes: [
+        [fn("DATE", col("createdAt")), "date"],
+        [fn("SUM", col("totalAmount")), "revenue"],
+      ],
+      where: {
+        status: { [Op.ne]: "Cancelled" }, // exclude cancelled orders
+      },
+      group: [literal('DATE("createdAt")')],
+      order: [[literal('DATE("createdAt")'), "ASC"]],
+      raw: true,
+    });
+
+    const dailyRevenue = results.map((r) => ({
+      date: r.date,
+      revenue: parseFloat(r.revenue),
+    }));
+
+    res.json(dailyRevenue);
+  } catch (err) {
+    console.error("Error fetching daily revenue:", err);
+    res.status(500).json({ error: "Failed to fetch daily revenue", details: err.message });
+  }
+});
+
 
 export default router;

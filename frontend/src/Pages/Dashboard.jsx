@@ -11,7 +11,7 @@ export default function Dashboard() {
   const options = [
     { name: "My Account", key: "account" },
     { name: "My Orders", key: "orders" },
-    { name: "Measurement Guide", key: "measurement-guide" },
+    { name: "Measurements", key: "measurement-guide" },
     { name: "Faqs", key: "faqs" },
     { name: "Return & Refund Policy", key: "returnandrefundpolicy" },
     { name: "Transaction History", key: "transactions" },

@@ -2,8 +2,9 @@
   "Men": {
     "Shirt": {
       "baseCost": 50,
+      "labourCost": 20,
       "materials": ["Cotton", "Linen", "Silk", "Polyester"],
-      "colors": ["White", "Black", "Blue", "Red", "Green","Yellow"],
+      "colors": ["White", "Black", "Blue", "Red", "Green", "Yellow"],
       "measurements": [
         {"name": "Neck", "placeholder": "Enter neck size in inches", "instruction": "Measure around the base of the neck comfortably."},
         {"name": "Shoulder", "placeholder": "Enter shoulder width in inches", "instruction": "Measure from one shoulder edge to the other across the back."},
@@ -16,10 +17,12 @@
         {"name": "Extra Buttons", "cost": 5},
         {"name": "Embroidery", "cost": 15},
         {"name": "Pocket Design", "cost": 10}
-      ]
+      ],
+      "suggestions": ["Pant", "Shorts"]
     },
     "Pant": {
       "baseCost": 40,
+      "labourCost": 15,
       "materials": ["Cotton", "Denim", "Linen"],
       "colors": ["Black", "Blue", "Gray", "Brown"],
       "measurements": [
@@ -31,12 +34,14 @@
       "extras": [
         {"name": "Cuff Design", "cost": 8},
         {"name": "Belt Loops", "cost": 5}
-      ]
+      ],
+      "suggestions": ["Shirt", "T-shirt"]
     }
   },
   "Women": {
     "Kurta": {
       "baseCost": 60,
+      "labourCost": 25,
       "materials": ["Cotton", "Silk", "Linen", "Chiffon"],
       "colors": ["Red", "Blue", "Green", "Yellow", "White", "Pink"],
       "measurements": [
@@ -50,10 +55,12 @@
       "extras": [
         {"name": "Embroidery", "cost": 20},
         {"name": "Side Slits", "cost": 10}  
-      ]
+      ],
+      "suggestions": ["Dupatta", "Leggings"]
     },
     "Lehenga": {
       "baseCost": 120,
+      "labourCost": 50,
       "materials": ["Silk", "Cotton", "Chiffon", "Velvet"],
       "colors": ["Red", "Blue", "Green", "Pink", "Purple", "Gold"],
       "measurements": [
@@ -64,7 +71,8 @@
       "extras": [
         {"name": "Dupatta Embroidery", "cost": 30},
         {"name": "Border Design", "cost": 25}
-      ]
+      ],
+      "suggestions": ["Choli", "Dupatta"]
     }
   }
 }
