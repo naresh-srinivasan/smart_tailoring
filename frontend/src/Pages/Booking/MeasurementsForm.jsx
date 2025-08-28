@@ -20,6 +20,7 @@ export default function MeasurementsForm({
   material,
   color,
   pattern,
+  inventory,
   collarType,
   sleeveType,
   buttonType,
@@ -51,6 +52,7 @@ export default function MeasurementsForm({
     Pant: "Shirt",
     Trouser: "Shirt"
   };
+
 
   // Enhanced suggestions for all dress types
   const getSuggestedOptions = (dressType) => {
@@ -749,8 +751,8 @@ export default function MeasurementsForm({
                           <span className="text-gray-700">Material</span>
                           <span className="font-semibold">
                             {formatCurrency(
-                              material && materialCosts[material]
-                                ? materialCosts[material] * (materialNeeded || 0)
+                              material && inventory[material]
+                                ? inventory.material.price * (materialNeeded || 0)
                                 : 0
                             )}
                           </span>

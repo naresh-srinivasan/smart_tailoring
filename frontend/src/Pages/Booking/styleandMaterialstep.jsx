@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Regular from "../../Assests/Regular.png";
 import Mandarin from "../../Assests/Mandarin.png";
 import ButtonDown from "../../Assests/ButtonDown.png";
@@ -31,6 +32,7 @@ export default function StyleAndMaterialStep({
 }) {
     const [inventory, setInventory] = useState([]);
     const [selectedCombination, setSelectedCombination] = useState(null);
+    const [hoveredCombination, setHoveredCombination] = useState(null);
 
     useEffect(() => {
         const fetchInventory = async () => {
@@ -71,13 +73,11 @@ export default function StyleAndMaterialStep({
         setPattern(combination.pattern);
     };
 
-    // Function to calculate discount percentage
     const calculateDiscount = (originalPrice, currentPrice) => {
         if (!originalPrice || originalPrice <= currentPrice) return 0;
         return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
     };
 
-    // Function to format currency
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -86,79 +86,45 @@ export default function StyleAndMaterialStep({
         }).format(price);
     };
 
-    // Function to convert color names or values to hex format
     const getColorHex = (colorValue) => {
         if (colorValue && colorValue.startsWith('#')) {
             return colorValue;
         }
         
         const colorMap = {
-            'red': '#FF0000',
-            'blue': '#0000FF',
-            'green': '#008000',
-            'yellow': '#FFFF00',
-            'black': '#000000',
+            'red': '#EF4444',
+            'blue': '#3B82F6',
+            'green': '#10B981',
+            'yellow': '#F59E0B',
+            'black': '#1F2937',
             'white': '#FFFFFF',
-            'gray': '#808080',
-            'grey': '#808080',
-            'purple': '#800080',
-            'orange': '#FFA500',
-            'pink': '#FFC0CB',
-            'brown': '#A52A2A',
-            'navy': '#000080',
-            'maroon': '#800000',
-            'olive': '#808000',
-            'lime': '#00FF00',
-            'aqua': '#00FFFF',
-            'teal': '#008080',
-            'silver': '#C0C0C0',
-            'fuchsia': '#FF00FF',
+            'gray': '#6B7280',
+            'grey': '#6B7280',
+            'purple': '#8B5CF6',
+            'orange': '#F97316',
+            'pink': '#EC4899',
+            'brown': '#A78BFA',
+            'navy': '#1E40AF',
+            'maroon': '#991B1B',
         };
         
         const colorName = colorValue ? colorValue.toLowerCase() : '';
-        return colorMap[colorName] || '#3b82f6';
+        return colorMap[colorName] || '#6366F1';
     };
 
     const createPatternPreview = (color, pattern) => {
         const hexColor = getColorHex(color);
         
-        const getStripeColors = (baseColor) => {
-            const colorLower = baseColor.toLowerCase();
-            
-            if (colorLower === '#ffff00' || colorLower === 'yellow') {
-                return {
-                    baseColor: '#ffd700',
-                    stripeColor: '#b8860b',
-                    lightStripe: '#fff8dc'
-                };
-            }
-            
-            if (colorLower === '#ffffff' || colorLower === 'white') {
-                return {
-                    baseColor: baseColor,
-                    stripeColor: '#cccccc',
-                    lightStripe: '#f0f0f0'
-                };
-            }
-            
-            return {
-                baseColor: baseColor,
-                stripeColor: baseColor,
-                lightStripe: 'rgba(255,255,255,0.4)'
-            };
-        };
-        
-        const { baseColor: adjustedBase, stripeColor, lightStripe } = getStripeColors(hexColor);
-        
         const baseStyle = {
             width: "100%",
-            height: "80px",
-            borderRadius: "8px",
-            border: "2px solid #e5e7eb",
+            height: "90px",
+            borderRadius: "12px",
+            border: "2px solid #E5E7EB",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: adjustedBase,
+            backgroundColor: hexColor,
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
         };
 
         switch (pattern?.toLowerCase()) {
@@ -167,14 +133,14 @@ export default function StyleAndMaterialStep({
                 return (
                     <div style={baseStyle}>
                         <div
-                            className="w-full h-full relative overflow-hidden rounded-md"
+                            className="w-full h-full relative overflow-hidden rounded-lg"
                             style={{
                                 background: `repeating-linear-gradient(
                                     45deg,
-                                    ${stripeColor},
-                                    ${stripeColor} 8px,
-                                    ${lightStripe} 8px,
-                                    ${lightStripe} 16px
+                                    ${hexColor},
+                                    ${hexColor} 8px,
+                                    rgba(255,255,255,0.3) 8px,
+                                    rgba(255,255,255,0.3) 16px
                                 )`,
                             }}
                         />
@@ -185,70 +151,63 @@ export default function StyleAndMaterialStep({
                 return (
                     <div style={baseStyle}>
                         <div
-                            className="w-full h-full relative overflow-hidden rounded-md"
+                            className="w-full h-full relative overflow-hidden rounded-lg"
                             style={{
-                                backgroundColor: adjustedBase,
-                                backgroundImage: hexColor.toLowerCase() === '#ffff00' || color.toLowerCase() === 'yellow'
-                                    ? "radial-gradient(circle, rgba(184,134,11,0.8) 2px, transparent 2px)"
-                                    : "radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px)",
+                                backgroundColor: hexColor,
+                                backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px)",
                                 backgroundSize: "15px 15px",
                             }}
                         />
                     </div>
                 );
-            case "checkered":
-            case "checks":
-                return (
-                    <div style={baseStyle}>
-                        <div
-                            className="w-full h-full relative overflow-hidden rounded-md"
-                            style={{
-                                background: `conic-gradient(from 90deg at 50% 50%, 
-                                    ${stripeColor} 90deg, 
-                                    ${lightStripe} 90deg, 
-                                    ${lightStripe} 180deg, 
-                                    ${stripeColor} 180deg, 
-                                    ${stripeColor} 270deg, 
-                                    ${lightStripe} 270deg)`,
-                                backgroundSize: "20px 20px",
-                            }}
-                        />
-                    </div>
-                );
-            case "floral":
-                return (
-                    <div style={baseStyle}>
-                        <div
-                            className="w-full h-full relative overflow-hidden rounded-md flex items-center justify-center"
-                            style={{ backgroundColor: adjustedBase }}
-                        >
-                            <div className={`text-xl opacity-70 ${
-                                hexColor.toLowerCase() === '#ffff00' || color.toLowerCase() === 'yellow' 
-                                    ? 'text-amber-800' 
-                                    : 'text-white'
-                            }`}>🌸</div>
-                        </div>
-                    </div>
-                );
-            case "solid":
             default:
                 return (
                     <div style={baseStyle}>
-                        <span className={`font-medium drop-shadow-md ${
-                            hexColor.toLowerCase() === '#ffff00' || color.toLowerCase() === 'yellow'
-                                ? 'text-amber-800'
-                                : 'text-white text-opacity-70'
-                        }`}>Solid</span>
+                        <span className="font-semibold text-white text-opacity-80 drop-shadow-md">
+                            Solid
+                        </span>
                     </div>
                 );
         }
     };
 
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.6,
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.5,
+                ease: "easeOut"
+            }
+        }
+    };
+
     return (
-        <div className="grid grid-cols-1 gap-6">
+        <motion.div
+            className="space-y-8 max-w-6xl mx-auto"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
             {/* Material Selection */}
-            <div className="flex flex-col gap-2">
-                <label className="text-gray-700 font-medium">Material</label>
+            <motion.div className="space-y-4" variants={itemVariants}>
+                <label className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <span className="text-2xl">🧵</span>
+                    Premium Materials
+                </label>
                 <select
                     value={material}
                     onChange={(e) => {
@@ -257,168 +216,204 @@ export default function StyleAndMaterialStep({
                         setPattern("");
                         setSelectedCombination(null);
                     }}
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 bg-white shadow-sm hover:shadow-md"
                     required
                 >
-                    <option value="">Select Material</option>
+                    <option value="" disabled>Choose your preferred material</option>
                     {allowedMaterials.map((mat) => (
-                        <option key={mat} value={mat}>
+                        <option key={mat} value={mat} className="font-medium">
                             {mat}
                         </option>
                     ))}
                 </select>
-            </div>
+            </motion.div>
 
             {/* Color & Pattern Combinations */}
-            {material && availableCombinations.length > 0 && (
-                <div className="flex flex-col gap-4">
-                    <label className="text-gray-700 font-medium">
-                        Available Color & Pattern Combinations
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {availableCombinations.map((combination, index) => {
-                            const hexColor = getColorHex(combination.color);
-                            const discountPercentage = calculateDiscount(combination.original_price, combination.price);
-                            const hasDiscount = discountPercentage > 0;
-                            
-                            return (
-                                <div
-                                    key={`${combination.id}-${index}`}
-                                    onClick={() => handleCombinationSelect(combination)}
-                                    className={`cursor-pointer border-2 rounded-lg p-3 transition-all duration-200 hover:shadow-md ${
-                                        selectedCombination?.id === combination.id
-                                            ? "border-blue-500 bg-blue-50 shadow-md"
-                                            : "border-gray-200 hover:border-gray-300"
-                                    }`}
-                                >
-                                    <div className="mb-3">
-                                        {combination.image ? (
-                                            <img
-                                                src={combination.image}
-                                                alt={`${combination.color} ${combination.pattern}`}
-                                                className="w-full h-20 object-cover rounded-md border"
-                                                onError={(e) => {
-                                                    e.target.style.display = "none";
-                                                    e.target.nextSibling.style.display = "block";
-                                                }}
-                                            />
-                                        ) : null}
-                                        <div style={{ display: combination.image ? "none" : "block" }}>
-                                            {createPatternPreview(combination.color, combination.pattern)}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <div
-                                                className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0 shadow-sm"
-                                                style={{
-                                                    backgroundColor: hexColor,
-                                                    borderColor: hexColor === '#FFFFFF' ? '#d1d5db' : hexColor,
-                                                }}
-                                            />
-                                            <span className="text-sm font-medium text-gray-800 truncate capitalize">
-                                                {combination.color}
-                                            </span>
-                                        </div>
-                                        <div className="text-sm text-gray-600 capitalize">
-                                            {combination.pattern || "Solid"}
-                                        </div>
-
-                                        {/* Enhanced Price Display with Discount */}
-                                        <div className="space-y-1">
-                                            {hasDiscount ? (
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-xs text-gray-500 line-through">
-                                                        {formatPrice(combination.original_price)}
-                                                    </span>
-                                                    <span className="text-sm font-bold text-red-600">
-                                                        {formatPrice(combination.price)}
-                                                    </span>
-                                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                                                        {discountPercentage}% OFF
-                                                    </span>
+            <AnimatePresence>
+                {material && availableCombinations.length > 0 && (
+                    <motion.div
+                        className="space-y-6"
+                        variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                    >
+                        <label className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                            <span className="text-2xl">🎨</span>
+                            Available Colors & Patterns
+                        </label>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {availableCombinations.map((combination, index) => {
+                                const hexColor = getColorHex(combination.color);
+                                const discountPercentage = calculateDiscount(combination.original_price, combination.price);
+                                const hasDiscount = discountPercentage > 0;
+                                const isSelected = selectedCombination?.id === combination.id;
+                                
+                                return (
+                                    <motion.div
+                                        key={`${combination.id}-${index}`}
+                                        className={`group cursor-pointer rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+                                            isSelected
+                                                ? "border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg shadow-indigo-500/20"
+                                                : "border-gray-200 hover:border-indigo-300 hover:shadow-lg"
+                                        }`}
+                                        onClick={() => handleCombinationSelect(combination)}
+                                        onMouseEnter={() => setHoveredCombination(combination.id)}
+                                        onMouseLeave={() => setHoveredCombination(null)}
+                                        whileHover={{ y: -4, scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                    >
+                                        {/* Image/Pattern Preview */}
+                                        <div className="relative">
+                                            {combination.image ? (
+                                                <img
+                                                    src={combination.image}
+                                                    alt={`${combination.color} ${combination.pattern}`}
+                                                    className="w-full h-24 object-cover"
+                                                    onError={(e) => {
+                                                        e.target.style.display = "none";
+                                                        e.target.nextSibling.style.display = "block";
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div style={{ display: combination.image ? "none" : "block" }}>
+                                                {createPatternPreview(combination.color, combination.pattern)}
+                                            </div>
+                                            
+                                            {/* Discount Badge */}
+                                            {hasDiscount && (
+                                                <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                                    {discountPercentage}% OFF
                                                 </div>
-                                            ) : (
-                                                <span className="text-sm font-bold text-gray-800">
-                                                    {formatPrice(combination.price)}
-                                                </span>
+                                            )}
+
+                                            {/* Selection Indicator */}
+                                            {isSelected && (
+                                                <motion.div
+                                                    className="absolute top-2 left-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ type: "spring", stiffness: 500 }}
+                                                >
+                                                    <span className="text-white text-sm">✓</span>
+                                                </motion.div>
                                             )}
                                         </div>
 
-                                        {combination.total_quantity !== undefined && (
-                                            <div
-                                                className={`text-xs ${
-                                                    combination.total_quantity > 0 ? "text-green-600" : "text-red-500"
-                                                }`}
-                                            >
+                                        {/* Content */}
+                                        <div className="p-4 space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-6 h-6 rounded-full border-2 border-white shadow-md flex-shrink-0"
+                                                    style={{
+                                                        backgroundColor: hexColor,
+                                                        borderColor: hexColor === '#FFFFFF' ? '#d1d5db' : 'white',
+                                                    }}
+                                                />
+                                                <div>
+                                                    <div className="font-semibold text-gray-800 capitalize text-sm">
+                                                        {combination.color}
+                                                    </div>
+                                                    <div className="text-xs text-gray-600 capitalize">
+                                                        {combination.pattern || "Solid"}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Price */}
+                                            <div className="space-y-1">
+                                                {hasDiscount ? (
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-xs text-gray-500 line-through">
+                                                            {formatPrice(combination.original_price)}
+                                                        </span>
+                                                        <span className="text-sm font-bold text-red-600">
+                                                            {formatPrice(combination.price)}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-sm font-bold text-gray-800">
+                                                        {formatPrice(combination.price)}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Stock Status */}
+                                            <div className={`text-xs font-medium ${
+                                                combination.total_quantity > 0 
+                                                    ? "text-green-600" 
+                                                    : "text-red-500"
+                                            }`}>
                                                 {combination.total_quantity > 0
-                                                    ? `${combination.total_quantity} m available`
+                                                    ? `${combination.total_quantity}m available`
                                                     : "Out of stock"}
                                             </div>
-                                        )}
-                                    </div>
-
-                                    {selectedCombination?.id === combination.id && (
-                                        <div className="mt-2 flex justify-center">
-                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                         </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Selected Combination Summary */}
+                        <AnimatePresence>
+                            {selectedCombination && (
+                                <motion.div
+                                    className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-2xl p-6"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <h4 className="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                                        <span className="text-xl">✨</span>
+                                        Selected Combination
+                                    </h4>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                        <div>
+                                            <span className="font-medium text-gray-700">Material:</span>
+                                            <div className="text-indigo-700 font-semibold">{selectedCombination.material}</div>
+                                        </div>
+                                        <div>
+                                            <span className="font-medium text-gray-700">Color:</span>
+                                            <div className="text-indigo-700 font-semibold">{selectedCombination.color}</div>
+                                        </div>
+                                        <div>
+                                            <span className="font-medium text-gray-700">Pattern:</span>
+                                            <div className="text-indigo-700 font-semibold">{selectedCombination.pattern}</div>
+                                        </div>
+                                        <div>
+                                            <span className="font-medium text-gray-700">Price:</span>
+                                            <div className="text-indigo-700 font-bold">{formatPrice(selectedCombination.price)}</div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Collar Selection */}
+            {dressType === "Shirt" && (
+                <motion.div className="space-y-6" variants={itemVariants}>
+                    <div className="flex items-center justify-between">
+                        <label className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                            <span className="text-2xl">👔</span>
+                            Collar Style
+                        </label>
+                        <button
+                            onClick={() => setShowCollarInfo(!showCollarInfo)}
+                            className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+                        >
+                            <span>ℹ️</span> Style Guide
+                        </button>
                     </div>
 
-                    {selectedCombination && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                            <h4 className="font-medium text-blue-900 mb-2">Selected Combination:</h4>
-                            <div className="flex items-center gap-4 text-sm flex-wrap">
-                                <span>
-                                    <strong>Material:</strong> {selectedCombination.material}
-                                </span>
-                                <span>
-                                    <strong>Color:</strong> {selectedCombination.color}
-                                </span>
-                                <span>
-                                    <strong>Pattern:</strong> {selectedCombination.pattern}
-                                </span>
-                                <div
-                                    className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
-                                    style={{
-                                        backgroundColor: getColorHex(selectedCombination.color),
-                                    }}
-                                />
-                                <div className="flex items-center gap-2">
-                                    <strong>Price:</strong>
-                                    {calculateDiscount(selectedCombination.original_price, selectedCombination.price) > 0 ? (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-500 line-through text-sm">
-                                                {formatPrice(selectedCombination.original_price)}
-                                            </span>
-                                            <span className="text-red-600 font-bold">
-                                                {formatPrice(selectedCombination.price)}
-                                            </span>
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                                {calculateDiscount(selectedCombination.original_price, selectedCombination.price)}% OFF
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <span className="font-bold">
-                                            {formatPrice(selectedCombination.price)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Collar Selection (image-based) */}
-            {dressType === "Shirt" && (
-                <div className="flex flex-col gap-2 relative">
-                    <label className="text-gray-700 font-medium">Collar Type</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                         {[
                             { label: "Regular", img: Regular },
                             { label: "Mandarin", img: Mandarin },
@@ -426,135 +421,185 @@ export default function StyleAndMaterialStep({
                             { label: "Spread", img: Spread },
                             { label: "LongPoint", img: LongPoint },
                         ].map((c) => (
-                            <div
+                            <motion.div
                                 key={c.label}
-                                onClick={() => setCollarType(c.label)}
-                                className={`cursor-pointer border-2 rounded-lg overflow-hidden transition-all duration-200 relative ${
-                                    collarType === c.label ? "border-blue-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                                className={`cursor-pointer rounded-2xl border-2 overflow-hidden transition-all duration-300 ${
+                                    collarType === c.label 
+                                        ? "border-indigo-500 shadow-lg shadow-indigo-500/25" 
+                                        : "border-gray-200 hover:border-indigo-300"
                                 }`}
+                                onClick={() => setCollarType(c.label)}
+                                whileHover={{ y: -2, scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                             >
-                                <img
-                                    src={c.img}
-                                    alt={c.label}
-                                    className="w-full h-28 object-contain"
-                                    onError={(e) => {
-                                        e.target.src = "/collars/default.png";
-                                    }}
-                                />
-                                <div className="absolute bottom-0 left-0 w-full bg-black/50 text-white text-center text-sm py-1">
-                                    {c.label}
+                                <div className="relative">
+                                    <img
+                                        src={c.img}
+                                        alt={c.label}
+                                        className="w-full h-32 object-contain bg-gray-50"
+                                        onError={(e) => {
+                                            e.target.src = "/collars/default.png";
+                                        }}
+                                    />
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                        <div className="text-white text-sm font-semibold text-center">
+                                            {c.label}
+                                        </div>
+                                    </div>
+                                    {collarType === c.label && (
+                                        <div className="absolute top-2 right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                                            <span className="text-white text-xs">✓</span>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
 
-                    {showCollarInfo && (
-                        <div className="mt-3 p-3 bg-gray-50 border rounded-lg shadow-inner">
-                            <h3 className="font-semibold mb-2 text-gray-700">Collar Types</h3>
-                            <p className="text-sm text-gray-600">Click on an image to select the collar type.</p>
-                        </div>
-                    )}
-                </div>
+                    <AnimatePresence>
+                        {showCollarInfo && (
+                            <motion.div
+                                className="bg-gray-50 border border-gray-200 rounded-xl p-6"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                            >
+                                <h3 className="font-semibold mb-3 text-gray-800">Collar Style Guide</h3>
+                                <p className="text-sm text-gray-600">
+                                    Choose from our collection of premium collar styles. Each style offers a different aesthetic and level of formality.
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
             )}
 
             {/* Sleeve Type */}
             {dressType === "Shirt" && (
-                <div className="flex flex-col gap-2 relative">
-                    <label className="text-gray-700 font-medium">Sleeve Type</label>
-                    <div className="flex items-center gap-2">
+                <motion.div className="space-y-4" variants={itemVariants}>
+                    <label className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                        <span className="text-2xl">👕</span>
+                        Sleeve Style
+                    </label>
+                    
+                    <div className="flex items-center gap-4">
                         <select
                             value={sleeveType}
                             onChange={(e) => setSleeveType(e.target.value)}
-                            className="flex-1 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                            className="flex-1 border-2 border-gray-200 rounded-xl p-4 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
                             required
                         >
-                            <option value="">Select Sleeve Type</option>
+                            <option value="" disabled>Choose sleeve length</option>
                             <option value="Half Sleeve">Half Sleeve</option>
                             <option value="Full Sleeve">Full Sleeve</option>
                         </select>
                         <button
-                            type="button"
                             onClick={() => setShowSleeveInfo(!showSleeveInfo)}
-                            className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                            className="px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors font-medium"
                         >
-                            i
+                            ℹ️ Info
                         </button>
                     </div>
 
-                    {showSleeveInfo && (
-                        <div className="mt-3 p-3 bg-gray-50 border rounded-lg shadow-inner">
-                            <h3 className="font-semibold mb-2 text-gray-700">Sleeve Types</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                {[
-                                    { label: "Half Sleeve", desc: "Short sleeves ending at mid-arm" },
-                                    { label: "Full Sleeve", desc: "Long sleeves ending at wrists" },
-                                ].map((s) => (
-                                    <div
-                                        key={s.label}
-                                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                                            sleeveType === s.label
-                                                ? "bg-blue-100 border-blue-500"
-                                                : "hover:bg-gray-100"
-                                        }`}
-                                        onClick={() => setSleeveType(s.label)}
-                                    >
-                                        <div className="font-medium">{s.label}</div>
-                                        <div className="text-sm text-gray-600">{s.desc}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    <AnimatePresence>
+                        {showSleeveInfo && (
+                            <motion.div
+                                className="bg-indigo-50 border border-indigo-200 rounded-xl p-6"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                            >
+                                <h3 className="font-semibold mb-4 text-indigo-900">Sleeve Options</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[
+                                        { label: "Half Sleeve", desc: "Short sleeves ending at mid-arm, perfect for casual and warm weather" },
+                                        { label: "Full Sleeve", desc: "Long sleeves ending at wrists, ideal for formal occasions and cooler weather" },
+                                    ].map((s) => (
+                                        <div
+                                            key={s.label}
+                                            className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                sleeveType === s.label
+                                                    ? "bg-indigo-100 border-indigo-400"
+                                                    : "bg-white border-gray-200 hover:border-indigo-200"
+                                            }`}
+                                            onClick={() => setSleeveType(s.label)}
+                                        >
+                                            <div className="font-semibold text-indigo-900">{s.label}</div>
+                                            <div className="text-sm text-gray-600 mt-1">{s.desc}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
             )}
 
-            {/* Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-2">
-                    <label className="text-gray-700 font-medium">Button Type (optional)</label>
-                    <select
-                        value={buttonType}
-                        onChange={(e) => setButtonType(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                    >
-                        <option value="">Select Button Type</option>
-                        <option value="Plastic">Plastic</option>
-                        <option value="Wooden">Wooden</option>
-                        <option value="Metal">Metal</option>
-                        <option value="Pearl">Pearl</option>
-                    </select>
-                </div>
+            {/* Button Customization */}
+            <motion.div className="space-y-6" variants={itemVariants}>
+                <label className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <span className="text-2xl">🔘</span>
+                    Button Customization
+                    <span className="text-sm font-normal text-gray-500">(Optional)</span>
+                </label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-gray-700 font-medium">Button Type</label>
+                        <select
+                            value={buttonType}
+                            onChange={(e) => setButtonType(e.target.value)}
+                            className="w-full border-2 border-gray-200 rounded-xl p-4 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                        >
+                            <option value="">Select button type</option>
+                            <option value="Plastic">Plastic - Durable & Lightweight</option>
+                            <option value="Wooden">Wooden - Natural & Elegant</option>
+                            <option value="Metal">Metal - Premium & Sophisticated</option>
+                            <option value="Pearl">Pearl - Luxurious & Classic</option>
+                        </select>
+                    </div>
 
-                <div className="flex flex-col gap-2">
-                    <label className="text-gray-700 font-medium">Button Color (optional)</label>
-                    <input
-                        type="text"
-                        value={buttonColor}
-                        onChange={(e) => setButtonColor(e.target.value)}
-                        placeholder="e.g., White, Black, Gold"
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                    />
+                    <div className="space-y-2">
+                        <label className="text-gray-700 font-medium">Button Color</label>
+                        <input
+                            type="text"
+                            value={buttonColor}
+                            onChange={(e) => setButtonColor(e.target.value)}
+                            placeholder="e.g., White, Black, Gold, Navy"
+                            className="w-full border-2 border-gray-200 rounded-xl p-4 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                        />
+                    </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Navigation */}
-            <div className="flex justify-between mt-6">
-                <button
+            <motion.div 
+                className="flex justify-between items-center pt-8 border-t border-gray-200"
+                variants={itemVariants}
+            >
+                <motion.button
                     type="button"
                     onClick={onBack}
-                    className="px-4 py-2 bg-gray-300 rounded-full hover:bg-gray-400 transition text-lg font-bold flex items-center gap-2"
+                    className="flex items-center gap-3 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all duration-300"
+                    whileHover={{ x: -5, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                 >
-                    ← Back
-                </button>
-                <button
+                    <span className="text-xl">←</span>
+                    Back to Garment Type
+                </motion.button>
+
+                <motion.button
                     type="button"
                     onClick={onNext}
                     disabled={!material || !color}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-yellow-500 text-white rounded-lg shadow-lg hover:from-blue-700 hover:to-yellow-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                 >
                     Continue to Measurements
-                </button>
-            </div>
-        </div>
+                    <span className="text-xl">→</span>
+                </motion.button>
+            </motion.div>
+        </motion.div>
     );
 }

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 export default function AdminNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const API_BASE = "http://localhost:5000/api";
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function AdminNotifications() {
         }
       } catch (err) {
         console.error("Error fetching notifications:", err);
-        setNotifications([]);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -35,54 +36,74 @@ export default function AdminNotifications() {
   }, []);
 
   const markAsRead = async (id) => {
-    const token = localStorage.getItem("token");
     try {
       await fetch(`${API_BASE}/notifications/${id}/read`, {
         method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
     } catch (err) {
-      console.error("Failed to mark as read:", err);
+      console.error("Error marking notification as read:", err);
     }
   };
 
-  return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-[#286fad]">Order Notifications</h1>
+  const deleteNotification = async (id) => {
+    try {
+      await fetch(`${API_BASE}/notifications/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      console.error("Error deleting notification:", err);
+    }
+  };
 
-      {loading ? (
-        <p className="text-gray-500">Loading notifications...</p>
-      ) : notifications.length === 0 ? (
-        <p className="text-gray-500">No new notifications</p>
-      ) : (
-        <div className="space-y-4">
-          {notifications.map((n) => (
-            <div
-              key={n.id}
-              className={`p-4 rounded-lg shadow-md transition ${
-                n.read ? "bg-gray-100" : "bg-blue-100"
-              }`}
-            >
-              <p className="text-lg font-medium">{n.title || "Notification"}</p>
-              <p className="text-gray-700">{n.message}</p>
-              <small className="text-gray-500 block mt-1">
-                {new Date(n.createdAt).toLocaleString()}
-              </small>
-              {!n.read && (
-                <button
-                  onClick={() => markAsRead(n.id)}
-                  className="mt-2 inline-block text-sm text-blue-600 underline"
-                >
-                  Mark as read
-                </button>
-              )}
-            </div>
-          ))}
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-gray-500" role="status">
+          <span className="sr-only">Loading...</span>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Error</h2>
+          <p className="text-lg">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-8">
+      <h1 className="text-3xl font-bold mb-4">Notifications</h1>
+      <ul className="divide-y divide-gray-200">
+        {notifications.map((notification) => (
+          <li key={notification.id} className="py-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold">{notification.title}</h2>
+              <small className="text-gray-500">{notification.timestamp}</small>
+            </div>
+            <p className="text-lg">{notification.message}</p>
+            <div className="flex justify-end mt-2">
+              <button onClick={() => markAsRead(notification.id)} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Mark as read
+              </button>
+              <button onClick={() => deleteNotification(notification.id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2">
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
-}
+};

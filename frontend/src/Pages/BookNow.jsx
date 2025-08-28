@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import measurementsData from "../data/Booking.json";
 import materialCosts from "../data/Material.json";
@@ -415,141 +415,300 @@ export default function BookNow() {
     []
   );
 
+  // Animation variants for smooth transitions
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -20,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
+  const stepVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      x: -50,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
   /* ---------------- Render ---------------- */
   if (orderCompleted && submittedOrder) {
     return (
-      <OrderCompleted
-        showConfetti={showConfetti}
-        submittedOrder={submittedOrder}
-        resetForm={resetForm}
-      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <OrderCompleted
+          showConfetti={showConfetti}
+          submittedOrder={submittedOrder}
+          resetForm={resetForm}
+        />
+      </motion.div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 px-4 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-indigo-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 -right-20 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-indigo-100/30 to-purple-100/30 rounded-full blur-2xl"></div>
+      </div>
+
       <motion.div
-        className="max-w-6xl mx-auto bg-white rounded-3xl p-10 shadow-2xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="relative max-w-7xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
-        <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
-          Book Now
-        </h1>
+        {/* Header Section */}
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+            Create Your Perfect Garment
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Experience the future of tailoring with our smart design process. Every stitch crafted to perfection.
+          </p>
+          
+          {/* Progress Bar */}
+          <div className="mt-8 max-w-2xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-indigo-600">Step {step} of 5</span>
+              <span className="text-sm font-medium text-gray-500">{Math.round((step/5) * 100)}% Complete</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <motion.div 
+                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${(step/5) * 100}%` }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+        </motion.div>
 
-        <StepIndicator step={step} titles={stepTitles} />
+        {/* Main Content Card */}
+        <motion.div
+          className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl shadow-indigo-500/10 border border-white/20 overflow-hidden"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          {/* Step Indicator */}
+          <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-8 py-6 border-b border-indigo-100/50">
+            <StepIndicator step={step} titles={stepTitles} />
+          </div>
 
-        {step === 1 && <GenderSelection onSelect={handleGenderSelect} />}
+          {/* Step Content */}
+          <div className="p-8 md:p-12">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                variants={stepVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                {step === 1 && (
+                  <div className="space-y-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-800 mb-4">Choose Your Style</h2>
+                      <p className="text-lg text-gray-600">Let's start by selecting the gender style for your garment</p>
+                    </div>
+                    <GenderSelection onSelect={handleGenderSelect} />
+                  </div>
+                )}
 
-        {step === 2 && (
-          <DressTypeSelection
-            gender={gender}
-            onBack={() => setStep(1)}
-            onSelect={handleDressTypeSelect}
-            measurementsData={measurementsData}
-          />
-        )}
+                {step === 2 && (
+                  <div className="space-y-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-800 mb-4">Select Garment Type</h2>
+                      <p className="text-lg text-gray-600">Choose the type of {gender} garment you'd like to create</p>
+                    </div>
+                    <DressTypeSelection
+                      gender={gender}
+                      onBack={() => setStep(1)}
+                      onSelect={handleDressTypeSelect}
+                      measurementsData={measurementsData}
+                    />
+                  </div>
+                )}
 
-        {step === 3 && (
-          <StyleAndMaterialStep
-            gender={gender}
-            dressType={dressType}
-            measurementsData={measurementsData}
-            material={material}
-            setMaterial={setMaterial}
-            color={color}
-            setColor={setColor}
-            pattern={pattern}
-            setPattern={setPattern}
-            collarType={collarType}
-            setCollarType={setCollarType}
-            sleeveType={sleeveType}
-            setSleeveType={setSleeveType}
-            buttonType={buttonType}
-            setButtonType={setButtonType}
-            buttonColor={buttonColor}
-            setButtonColor={setButtonColor}
-            showCollarInfo={showCollarInfo}
-            setShowCollarInfo={setShowCollarInfo}
-            showSleeveInfo={showSleeveInfo}
-            setShowSleeveInfo={setShowSleeveInfo}
-            onBack={() => setStep(2)}
-            onNext={proceedFromStyleToMeasurements}
-          />
-        )}
+                {step === 3 && (
+                  <div className="space-y-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-800 mb-4">Style & Materials</h2>
+                      <p className="text-lg text-gray-600">Customize your {dressType} with premium materials and styling options</p>
+                    </div>
+                    <StyleAndMaterialStep
+                      gender={gender}
+                      dressType={dressType}
+                      measurementsData={measurementsData}
+                      material={material}
+                      setMaterial={setMaterial}
+                      color={color}
+                      setColor={setColor}
+                      pattern={pattern}
+                      setPattern={setPattern}
+                      collarType={collarType}
+                      setCollarType={setCollarType}
+                      sleeveType={sleeveType}
+                      setSleeveType={setSleeveType}
+                      buttonType={buttonType}
+                      setButtonType={setButtonType}
+                      buttonColor={buttonColor}
+                      setButtonColor={setButtonColor}
+                      showCollarInfo={showCollarInfo}
+                      setShowCollarInfo={setShowCollarInfo}
+                      showSleeveInfo={showSleeveInfo}
+                      setShowSleeveInfo={setShowSleeveInfo}
+                      onBack={() => setStep(2)}
+                      onNext={proceedFromStyleToMeasurements}
+                    />
+                  </div>
+                )}
 
-        {step === 4 && (
-          <MeasurementsForm
-            gender={gender}
-            dressType={dressType}
-            measurementsData={measurementsData}
-            measurementUnit={measurementUnit}
-            setMeasurementUnit={setMeasurementUnit}
-            formData={formData}
-            setFormData={setFormData}
-            showInstructions={showInstructions}
-            toggleInstruction={toggleInstruction}
-            handleExtraChange={handleExtraChange}
-            materialNeeded={materialNeeded}
-            materialCosts={materialCosts}
-            material={material}
-            color={color}
-            materialPricePerMeter={materialPricePerMeter}
-            totalCost={totalCost}
-            currency={currency}
-            pattern={pattern}
-            setCurrency={setCurrency}
-            conversionRate={conversionRates[currency] || 1}
-            DELIVERY_CHARGE={DELIVERY_CHARGE}
-            LABOUR_CHARGE={LABOUR_CHARGE}
-            collarType={collarType}
-            sleeveType={sleeveType}
-            buttonType={buttonType}
-            buttonColor={buttonColor}
-            INTERNET_HANDLING_FEES={INTERNET_HANDLING_FEES}
-            onBack={() => setStep(3)}
-            onSubmit={proceedToSummary}
-          />
-        )}
+                {step === 4 && (
+                  <div className="space-y-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-800 mb-4">Perfect Measurements</h2>
+                      <p className="text-lg text-gray-600">Provide your measurements for a perfect fit</p>
+                    </div>
+                    <MeasurementsForm
+                      gender={gender}
+                      dressType={dressType}
+                      measurementsData={measurementsData}
+                      measurementUnit={measurementUnit}
+                      setMeasurementUnit={setMeasurementUnit}
+                      formData={formData}
+                      setFormData={setFormData}
+                      showInstructions={showInstructions}
+                      toggleInstruction={toggleInstruction}
+                      handleExtraChange={handleExtraChange}
+                      materialNeeded={materialNeeded}
+                      materialCosts={materialCosts}
+                      material={material}
+                      color={color}
+                      materialPricePerMeter={materialPricePerMeter}
+                      totalCost={totalCost}
+                      currency={currency}
+                      pattern={pattern}
+                      setCurrency={setCurrency}
+                      conversionRate={conversionRates[currency] || 1}
+                      DELIVERY_CHARGE={DELIVERY_CHARGE}
+                      LABOUR_CHARGE={LABOUR_CHARGE}
+                      collarType={collarType}
+                      sleeveType={sleeveType}
+                      inventory={inventory}
+                      buttonType={buttonType}
+                      buttonColor={buttonColor}
+                      INTERNET_HANDLING_FEES={INTERNET_HANDLING_FEES}
+                      onBack={() => setStep(3)}
+                      onSubmit={proceedToSummary}
+                    />
+                  </div>
+                )}
 
-        {step === 5 && (
-          <OrderSummary
-            gender={gender}
-            dressType={dressType}
-            material={material}
-            color={color}
-            pattern={pattern}
-            measurementUnit={measurementUnit}
-            materialNeeded={materialNeeded}
-            materialPricePerMeter={materialPricePerMeter}
-            collarType={collarType}
-            sleeveType={sleeveType}
-            buttonType={buttonType}
-            buttonColor={buttonColor}
-            formData={formData}
-            measurementsData={measurementsData}
-            promoCode={promoCode}
-            setPromoCode={setPromoCode}
-            promoError={promoError}
-            discount={discount}
-            applyPromoCode={applyPromoCode}
-            removePromoCode={removePromoCode}
-            totalCost={totalCost}
-            userProfile={userProfile}
-            useProfileAddress={useProfileAddress}
-            setUseProfileAddress={setUseProfileAddress}
-            deliveryAddress={deliveryAddress}
-            setDeliveryAddress={setDeliveryAddress}
-            expectedDate={expectedDate}
-            setExpectedDate={setExpectedDate}
-            currency={currency}
-            setCurrency={setCurrency}
-            conversionRate={conversionRates[currency] || 1}
-            isSubmitting={isSubmitting}
-            onBack={() => setStep(4)}
-            onSubmit={handleFinalSubmit}
-          />
-        )}
+                {step === 5 && (
+                  <div className="space-y-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-800 mb-4">Order Summary</h2>
+                      <p className="text-lg text-gray-600">Review your custom garment details and complete your order</p>
+                    </div>
+                    <OrderSummary
+                      gender={gender}
+                      dressType={dressType}
+                      material={material}
+                      color={color}
+                      pattern={pattern}
+                      measurementUnit={measurementUnit}
+                      materialNeeded={materialNeeded}
+                      materialPricePerMeter={materialPricePerMeter}
+                      collarType={collarType}
+                      sleeveType={sleeveType}
+                      buttonType={buttonType}
+                      buttonColor={buttonColor}
+                      formData={formData}
+                      measurementsData={measurementsData}
+                      promoCode={promoCode}
+                      setPromoCode={setPromoCode}
+                      promoError={promoError}
+                      discount={discount}
+                      applyPromoCode={applyPromoCode}
+                      removePromoCode={removePromoCode}
+                      totalCost={totalCost}
+                      userProfile={userProfile}
+                      useProfileAddress={useProfileAddress}
+                      setUseProfileAddress={setUseProfileAddress}
+                      deliveryAddress={deliveryAddress}
+                      setDeliveryAddress={setDeliveryAddress}
+                      expectedDate={expectedDate}
+                      setExpectedDate={setExpectedDate}
+                      currency={currency}
+                      setCurrency={setCurrency}
+                      conversionRate={conversionRates[currency] || 1}
+                      isSubmitting={isSubmitting}
+                      onBack={() => setStep(4)}
+                      onSubmit={handleFinalSubmit}
+                    />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Footer Progress */}
+          <div className="bg-gradient-to-r from-gray-50 to-indigo-50/30 px-8 py-4 border-t border-gray-100">
+            <div className="flex justify-between items-center text-sm text-gray-600">
+              <span>Weave Nest • Smart Tailoring</span>
+              <span>Secure & Encrypted Process 🔒</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Footer Note */}
+        <motion.div 
+          className="text-center mt-8 text-gray-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+        >
+          <p className="text-sm">
+            Need help? Contact our support team at{" "}
+            <span className="text-indigo-600 font-medium">support@weavenest.com</span>
+          </p>
+        </motion.div>
       </motion.div>
     </div>
   );
